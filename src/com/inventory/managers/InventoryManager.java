@@ -78,8 +78,12 @@ public class InventoryManager {
         // Generate product ID
         String id = "P" + String.format("%03d", productIdCounter++);
         
+        // Get supplier ID (optional)
+        System.out.print("Enter supplier ID (or press Enter to skip): ");
+        String supplierId = scanner.nextLine().trim();
+        
         // Create and add product
-        Product product = new Product(id, name, price, quantity, reorderLevel);
+        Product product = new Product(id, name, price, quantity, reorderLevel, supplierId);
         products.add(product);
         
         System.out.println("Product added successfully! Product ID: " + id);
@@ -192,11 +196,24 @@ public class InventoryManager {
             }
         }
         
+        // Update supplier ID
+        System.out.print("Supplier ID [" + (product.getSupplierId().isEmpty() ? "N/A" : product.getSupplierId()) + "]: ");
+        String supplierId = scanner.nextLine().trim();
+        if (!supplierId.isEmpty()) {
+            product.setSupplierId(supplierId);
+            System.out.println("Supplier ID updated to: " + supplierId);
+        }
+        
         System.out.println("Product updated successfully!");
     }
     
-    public void deleteProduct(Scanner scanner) {
+    public void deleteProduct(Scanner scanner, boolean canDelete) {
         System.out.println("\n=== Delete Product ===");
+        
+        if (!canDelete) {
+            System.out.println("✗ Access denied. You do not have permission to delete products.");
+            return;
+        }
         
         if (products.isEmpty()) {
             System.out.println("No products found to delete.");
@@ -439,5 +456,171 @@ public class InventoryManager {
             }
             this.productIdCounter = maxId + 1;
         }
+    }
+    
+    // Search & Filtering Methods (Phase 8)
+    public void searchProducts(Scanner scanner) {
+        System.out.println("\n=== Search Products ===");
+        System.out.println("Search by:");
+        System.out.println("1. Product Name (partial match)");
+        System.out.println("2. Price Range");
+        System.out.println("3. Supplier ID");
+        System.out.println("4. View Products by Supplier");
+        System.out.println("5. Back to Product Management");
+        System.out.print("Enter your choice (1-5): ");
+        
+        try {
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+            
+            switch (choice) {
+                case 1:
+                    searchByName(scanner);
+                    break;
+                case 2:
+                    searchByPriceRange(scanner);
+                    break;
+                case 3:
+                    searchBySupplierId(scanner);
+                    break;
+                case 4:
+                    viewProductsBySupplier(scanner);
+                    break;
+                case 5:
+                    return;
+                default:
+                    System.out.println("Invalid choice. Please enter a number between 1 and 5.");
+                    break;
+            }
+        } catch (Exception e) {
+            System.out.println("Invalid input. Please enter a valid number.");
+            scanner.nextLine(); // Clear the invalid input
+        }
+    }
+    
+    private void searchByName(Scanner scanner) {
+        System.out.print("Enter product name to search (partial match): ");
+        String searchTerm = scanner.nextLine().trim().toLowerCase();
+        
+        if (searchTerm.isEmpty()) {
+            System.out.println("Error: Search term cannot be empty.");
+            return;
+        }
+        
+        List<Product> results = new ArrayList<>();
+        for (Product product : products) {
+            if (product.getName().toLowerCase().contains(searchTerm)) {
+                results.add(product);
+            }
+        }
+        
+        displaySearchResults(results, "Name Search: '" + searchTerm + "'");
+    }
+    
+    private void searchByPriceRange(Scanner scanner) {
+        double minPrice = -1;
+        double maxPrice = -1;
+        
+        // Get minimum price
+        while (minPrice < 0) {
+            try {
+                System.out.print("Enter minimum price: $");
+                minPrice = scanner.nextDouble();
+                if (minPrice < 0) {
+                    System.out.println("Error: Minimum price must be 0 or greater.");
+                }
+            } catch (Exception e) {
+                System.out.println("Error: Please enter a valid number for minimum price.");
+                scanner.nextLine(); // Clear invalid input
+            }
+        }
+        
+        // Get maximum price
+        while (maxPrice < minPrice) {
+            try {
+                System.out.print("Enter maximum price: $");
+                maxPrice = scanner.nextDouble();
+                if (maxPrice < minPrice) {
+                    System.out.println("Error: Maximum price must be greater than or equal to minimum price.");
+                }
+            } catch (Exception e) {
+                System.out.println("Error: Please enter a valid number for maximum price.");
+                scanner.nextLine(); // Clear invalid input
+            }
+        }
+        
+        List<Product> results = new ArrayList<>();
+        for (Product product : products) {
+            if (product.getPrice() >= minPrice && product.getPrice() <= maxPrice) {
+                results.add(product);
+            }
+        }
+        
+        displaySearchResults(results, "Price Range: $" + minPrice + " - $" + maxPrice);
+    }
+    
+    private void searchBySupplierId(Scanner scanner) {
+        System.out.print("Enter supplier ID to search: ");
+        String supplierId = scanner.nextLine().trim();
+        
+        if (supplierId.isEmpty()) {
+            System.out.println("Error: Supplier ID cannot be empty.");
+            return;
+        }
+        
+        List<Product> results = new ArrayList<>();
+        for (Product product : products) {
+            if (product.getSupplierId().equals(supplierId)) {
+                results.add(product);
+            }
+        }
+        
+        displaySearchResults(results, "Supplier ID: " + supplierId);
+    }
+    
+    private void displaySearchResults(List<Product> results, String searchType) {
+        System.out.println("\n=== Search Results: " + searchType + " ===");
+        
+        if (results.isEmpty()) {
+            System.out.println("No products found matching the search criteria.");
+            return;
+        }
+        
+        // Print header
+        System.out.printf("%-10s %-20s %-12s %-10s %-15s %-12s%n", 
+                         "ID", "Name", "Price", "Quantity", "Reorder Level", "Supplier ID");
+        System.out.println("------------------------------------------------------------------------");
+        
+        // Print each product
+        for (Product product : results) {
+            System.out.printf("%-10s %-20s $%-11.2f %-10d %-15d %-12s%n",
+                             product.getId(), 
+                             product.getName(), 
+                             product.getPrice(), 
+                             product.getQuantity(), 
+                             product.getReorderLevel(),
+                             product.getSupplierId().isEmpty() ? "N/A" : product.getSupplierId());
+        }
+        
+        System.out.println("\nTotal results: " + results.size());
+    }
+    
+    private void viewProductsBySupplier(Scanner scanner) {
+        System.out.print("Enter supplier ID to view products: ");
+        String supplierId = scanner.nextLine().trim();
+        
+        if (supplierId.isEmpty()) {
+            System.out.println("Error: Supplier ID cannot be empty.");
+            return;
+        }
+        
+        List<Product> results = new ArrayList<>();
+        for (Product product : products) {
+            if (product.getSupplierId().equals(supplierId)) {
+                results.add(product);
+            }
+        }
+        
+        displaySearchResults(results, "Supplier: " + supplierId);
     }
 }

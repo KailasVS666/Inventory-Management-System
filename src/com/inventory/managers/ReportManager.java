@@ -201,4 +201,113 @@ public class ReportManager {
         // We'll need to add a method to OrderManager to get the orders list
         return orderManager.getOrders();
     }
+    
+    // Export Methods (Phase 8)
+    public void exportLowStockReport() {
+        System.out.println("\n=== Export Low Stock Report ===");
+        
+        List<Product> products = getProductsFromInventory();
+        if (products.isEmpty()) {
+            System.out.println("No products found to export.");
+            return;
+        }
+        
+        // Filter low stock products
+        List<Product> lowStockProducts = new ArrayList<>();
+        for (Product product : products) {
+            if (product.getQuantity() <= product.getReorderLevel()) {
+                lowStockProducts.add(product);
+            }
+        }
+        
+        if (lowStockProducts.isEmpty()) {
+            System.out.println("No low stock products found to export.");
+            return;
+        }
+        
+        // Create exports directory if it doesn't exist
+        createExportsDirectory();
+        
+        // Generate filename with timestamp
+        String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        String filename = "exports/low_stock_report_" + timestamp + ".csv";
+        
+        try (java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.FileWriter(filename))) {
+            // Write CSV header
+            writer.println("ID,Name,Quantity,Reorder Level,Status,Supplier ID");
+            
+            // Write data rows
+            for (Product product : lowStockProducts) {
+                String status = product.getQuantity() <= product.getReorderLevel() ? "LOW STOCK" : "OK";
+                String supplierId = product.getSupplierId().isEmpty() ? "N/A" : product.getSupplierId();
+                
+                writer.printf("%s,%s,%d,%d,%s,%s%n",
+                             product.getId(),
+                             product.getName(),
+                             product.getQuantity(),
+                             product.getReorderLevel(),
+                             status,
+                             supplierId);
+            }
+            
+            System.out.println("✓ Low Stock Report exported successfully to: " + filename);
+            System.out.println("Total products exported: " + lowStockProducts.size());
+            
+        } catch (java.io.IOException e) {
+            System.err.println("✗ Error exporting report: " + e.getMessage());
+        }
+    }
+    
+    public void exportInventoryValueReport() {
+        System.out.println("\n=== Export Inventory Value Report ===");
+        
+        List<Product> products = getProductsFromInventory();
+        if (products.isEmpty()) {
+            System.out.println("No products found to export.");
+            return;
+        }
+        
+        // Create exports directory if it doesn't exist
+        createExportsDirectory();
+        
+        // Generate filename with timestamp
+        String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        String filename = "exports/inventory_value_report_" + timestamp + ".csv";
+        
+        try (java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.FileWriter(filename))) {
+            // Write CSV header
+            writer.println("ID,Name,Price,Quantity,Item Value,Supplier ID");
+            
+            // Write data rows
+            for (Product product : products) {
+                double itemValue = product.getPrice() * product.getQuantity();
+                String supplierId = product.getSupplierId().isEmpty() ? "N/A" : product.getSupplierId();
+                
+                writer.printf("%s,%s,%.2f,%d,%.2f,%s%n",
+                             product.getId(),
+                             product.getName(),
+                             product.getPrice(),
+                             product.getQuantity(),
+                             itemValue,
+                             supplierId);
+            }
+            
+            System.out.println("✓ Inventory Value Report exported successfully to: " + filename);
+            System.out.println("Total products exported: " + products.size());
+            
+        } catch (java.io.IOException e) {
+            System.err.println("✗ Error exporting report: " + e.getMessage());
+        }
+    }
+    
+    private void createExportsDirectory() {
+        java.io.File exportsDir = new java.io.File("exports");
+        if (!exportsDir.exists()) {
+            if (exportsDir.mkdir()) {
+                System.out.println("ℹ Created exports directory");
+            } else {
+                System.err.println("✗ Failed to create exports directory");
+            }
+        }
+    }
 }

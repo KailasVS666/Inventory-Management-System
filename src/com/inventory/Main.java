@@ -5,6 +5,7 @@ import com.inventory.managers.InventoryManager;
 import com.inventory.managers.SupplierManager;
 import com.inventory.managers.OrderManager;
 import com.inventory.managers.ReportManager;
+import com.inventory.managers.UserManager; // Added for Phase 8
 import com.inventory.DataStore;
 
 public class Main {
@@ -12,16 +13,26 @@ public class Main {
     private static SupplierManager supplierManager = new SupplierManager();
     private static OrderManager orderManager = new OrderManager(inventoryManager);
     private static ReportManager reportManager = new ReportManager(inventoryManager, orderManager);
+    private static UserManager userManager = new UserManager(); // Added for Phase 8
     
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         boolean running = true;
         
-        System.out.println("=== Inventory Management System - Phase 7 ===");
+        System.out.println("=== Inventory Management System - Phase 8 ===");
+        
+        // User Authentication (Phase 8)
+        if (!userManager.login(scanner)) {
+            System.out.println("Authentication failed. Exiting...");
+            scanner.close();
+            return;
+        }
+        
+        System.out.println();
         
         while (running) {
             displayMenu();
-            System.out.print("Enter your choice (1-7): ");
+            System.out.print("Enter your choice (1-8): ");
             
             try {
                 int choice = scanner.nextInt();
@@ -47,11 +58,14 @@ public class Main {
                         dataManagementMenu(scanner);
                         break;
                     case 7:
+                        userManagementMenu(scanner);
+                        break;
+                    case 8:
                         System.out.println("Exiting Inventory Management System...");
                         running = false;
                         break;
                     default:
-                        System.out.println("Invalid choice. Please enter a number between 1 and 7.");
+                        System.out.println("Invalid choice. Please enter a number between 1 and 8.");
                         break;
                 }
                 
@@ -82,7 +96,8 @@ public class Main {
         System.out.println("4. Sales & Orders");
         System.out.println("5. Reports & Analytics");
         System.out.println("6. Data Management");
-        System.out.println("7. Exit");
+        System.out.println("7. User Management");
+        System.out.println("8. Exit");
         System.out.println("=================");
     }
     
@@ -90,12 +105,13 @@ public class Main {
         boolean inMenu = true;
         while (inMenu) {
             System.out.println("\n=== Product Management ===");
-            System.out.println("1. Add Product");
-            System.out.println("2. View Products");
-            System.out.println("3. Update Product");
-            System.out.println("4. Delete Product");
-            System.out.println("5. Back to Main Menu");
-            System.out.print("Enter your choice (1-5): ");
+                    System.out.println("1. Add Product");
+        System.out.println("2. View Products");
+        System.out.println("3. Update Product");
+        System.out.println("4. Delete Product");
+        System.out.println("5. Search Products");
+        System.out.println("6. Back to Main Menu");
+        System.out.print("Enter your choice (1-6): ");
             
             try {
                 int choice = scanner.nextInt();
@@ -112,13 +128,16 @@ public class Main {
                         inventoryManager.updateProduct(scanner);
                         break;
                     case 4:
-                        inventoryManager.deleteProduct(scanner);
+                        inventoryManager.deleteProduct(scanner, userManager.getCurrentUser().canDelete());
                         break;
                     case 5:
+                        inventoryManager.searchProducts(scanner);
+                        break;
+                    case 6:
                         inMenu = false;
                         break;
                     default:
-                        System.out.println("Invalid choice. Please enter a number between 1 and 5.");
+                        System.out.println("Invalid choice. Please enter a number between 1 and 6.");
                         break;
                 }
                 
@@ -208,7 +227,7 @@ public class Main {
                         supplierManager.updateSupplier(scanner);
                         break;
                     case 4:
-                        supplierManager.deleteSupplier(scanner);
+                        supplierManager.deleteSupplier(scanner, userManager.getCurrentUser().canDelete());
                         break;
                     case 5:
                         inMenu = false;
@@ -278,11 +297,13 @@ public class Main {
         boolean inMenu = true;
         while (inMenu) {
             System.out.println("\n=== Reports & Analytics ===");
-            System.out.println("1. View Low Stock Products");
-            System.out.println("2. View Total Inventory Value");
-            System.out.println("3. View Sales Summary");
-            System.out.println("4. Back to Main Menu");
-            System.out.print("Enter your choice (1-4): ");
+                    System.out.println("1. View Low Stock Products");
+        System.out.println("2. View Total Inventory Value");
+        System.out.println("3. View Sales Summary");
+        System.out.println("4. Export Low Stock Report");
+        System.out.println("5. Export Inventory Value Report");
+        System.out.println("6. Back to Main Menu");
+        System.out.print("Enter your choice (1-6): ");
             
             try {
                 int choice = scanner.nextInt();
@@ -299,10 +320,16 @@ public class Main {
                         reportManager.viewSalesSummary();
                         break;
                     case 4:
+                        reportManager.exportLowStockReport();
+                        break;
+                    case 5:
+                        reportManager.exportInventoryValueReport();
+                        break;
+                    case 6:
                         inMenu = false;
                         break;
                     default:
-                        System.out.println("Invalid choice. Please enter a number between 1 and 4.");
+                        System.out.println("Invalid choice. Please enter a number between 1 and 6.");
                         break;
                 }
                 
@@ -319,6 +346,12 @@ public class Main {
     }
     
     private static void dataManagementMenu(Scanner scanner) {
+        // Check if user has access to Data Management
+        if (!userManager.getCurrentUser().canAccessDataManagement()) {
+            System.out.println("✗ Access denied. Admin privileges required for Data Management.");
+            return;
+        }
+        
         boolean inMenu = true;
         while (inMenu) {
             System.out.println("\n=== Data Management ===");
@@ -367,6 +400,7 @@ public class Main {
         inventoryManager.saveProducts();
         supplierManager.saveSuppliers();
         orderManager.saveOrders();
+        userManager.saveUsers(); // Added for Phase 8
         System.out.println("✓ All data saved successfully!");
     }
     
@@ -380,9 +414,60 @@ public class Main {
             DataStore.deleteDataFile(DataStore.PRODUCTS_FILE);
             DataStore.deleteDataFile(DataStore.SUPPLIERS_FILE);
             DataStore.deleteDataFile(DataStore.ORDERS_FILE);
+            DataStore.deleteDataFile(DataStore.USERS_FILE); // Added for Phase 8
             System.out.println("✓ All data files deleted successfully!");
         } else {
             System.out.println("Data file deletion cancelled.");
+        }
+    }
+    
+    // User Management Menu (Phase 8)
+    private static void userManagementMenu(Scanner scanner) {
+        boolean inMenu = true;
+        while (inMenu) {
+            System.out.println("\n=== User Management ===");
+            System.out.println("1. Create New User");
+            System.out.println("2. View All Users");
+            System.out.println("3. Change Password");
+            System.out.println("4. Logout");
+            System.out.println("5. Back to Main Menu");
+            System.out.print("Enter your choice (1-5): ");
+            
+            try {
+                int choice = scanner.nextInt();
+                scanner.nextLine(); // Consume newline
+                
+                switch (choice) {
+                    case 1:
+                        userManager.createUser(scanner);
+                        break;
+                    case 2:
+                        userManager.viewUsers();
+                        break;
+                    case 3:
+                        userManager.changePassword(scanner);
+                        break;
+                    case 4:
+                        userManager.logout();
+                        inMenu = false;
+                        break;
+                    case 5:
+                        inMenu = false;
+                        break;
+                    default:
+                        System.out.println("Invalid choice. Please enter a number between 1 and 5.");
+                        break;
+                }
+                
+                if (inMenu) {
+                    System.out.println("\nPress Enter to continue...");
+                    scanner.nextLine();
+                }
+                
+            } catch (Exception e) {
+                System.out.println("Invalid input. Please enter a valid number.");
+                scanner.nextLine(); // Clear the invalid input
+            }
         }
     }
 }

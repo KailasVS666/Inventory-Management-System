@@ -112,8 +112,13 @@ public class SupplierManager {
         System.out.println("Supplier updated successfully!");
     }
     
-    public void deleteSupplier(Scanner scanner) {
+    public void deleteSupplier(Scanner scanner, boolean canDelete) {
         System.out.println("\n=== Delete Supplier ===");
+        
+        if (!canDelete) {
+            System.out.println("✗ Access denied. You do not have permission to delete suppliers.");
+            return;
+        }
         
         if (suppliers.isEmpty()) {
             System.out.println("No suppliers found to delete.");

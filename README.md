@@ -1,203 +1,261 @@
-# Inventory Management System - Phase 7
+# Inventory Management System - Phase 8: Advanced Features
 
-A comprehensive Java console-based inventory management system with full CRUD operations, stock management, supplier management, sales tracking, reporting, and data persistence.
+A comprehensive Java console-based Inventory Management System with advanced features including user authentication, search & filtering, and report export functionality.
 
-## 🚀 **Current Status: Phase 7 Complete!**
+## 🚀 Features Overview
 
-The system now includes **7 complete phases** with enterprise-level functionality:
+### ✅ Completed Phases (1-7)
+- **Phase 1**: Product Management (Add, View, Update, Delete)
+- **Phase 2**: Stock Management (Check Levels, Add/Remove Stock, Reorder Levels)
+- **Phase 3**: Supplier Management (Add, View, Update, Delete)
+- **Phase 4**: Sales & Orders (Create Orders, Process Sales, Order History)
+- **Phase 5**: Reports & Analytics (Low Stock, Inventory Value, Sales Summary)
+- **Phase 6**: Data Persistence (Automatic Save/Load, File Management)
+- **Phase 7**: Enhanced UI & Validation (Input Validation, Error Handling)
 
-- ✅ **Phase 1**: Basic structure & placeholder menu
-- ✅ **Phase 2**: Product Management CRUD operations
-- ✅ **Phase 3**: Stock Management & monitoring
-- ✅ **Phase 4**: Supplier Management CRUD operations
-- ✅ **Phase 5**: Sales & Orders management
-- ✅ **Phase 6**: Reports & Analytics
-- ✅ **Phase 7**: Data Persistence & storage
+### 🆕 Phase 8: Advanced Features
+- **Search & Filtering**: Advanced product search capabilities
+- **User Authentication**: Role-based access control (Admin/Staff)
+- **Report Export**: CSV export functionality for reports
+- **Enhanced Security**: Permission-based operations
 
-## 📋 **Features Overview**
+## 🔐 User Authentication System
 
-### **Phase 1: Basic Structure**
-- Console-based menu system
-- Basic navigation framework
-- Placeholder functionality for all modules
+### User Roles
+- **Admin**: Full access to all features
+- **Staff**: Restricted access (cannot delete products/suppliers, no data management access)
 
-### **Phase 2: Product Management**
-- Add new products with auto-generated IDs (P001, P002, ...)
-- View all products in formatted tables
-- Update existing product details
-- Delete products with confirmation
-- Input validation and error handling
+### Default Credentials
+- **Username**: `admin`
+- **Password**: `admin123`
 
-### **Phase 3: Stock Management**
-- Check stock levels with status indicators (OK/LOW STOCK)
-- Add stock to existing products
-- Remove stock with validation
-- Update reorder levels
-- Automatic low stock detection
+### Security Features
+- Login required before accessing any menu
+- Role-based permission system
+- Maximum 3 login attempts
+- Session management
 
-### **Phase 4: Supplier Management**
-- Add new suppliers with auto-generated IDs (S001, S002, ...)
-- View all suppliers in formatted tables
-- Update existing supplier details
-- Delete suppliers with confirmation
-- Input validation and error handling
+## 🔍 Search & Filtering Features
 
-### **Phase 5: Sales & Orders**
-- Create new orders with auto-generated IDs (O001, O002, ...)
-- View complete order history with summaries
-- Process direct sales without order tracking
-- Automatic stock reduction on sales
-- Stock validation to prevent overselling
+### Product Search Options
+1. **Name Search**: Case-insensitive partial matching
+2. **Price Range**: Search by minimum and maximum price
+3. **Supplier ID**: Find products by specific supplier
+4. **View by Supplier**: Display all products from a specific supplier
 
-### **Phase 6: Reports & Analytics**
-- Low stock products report with critical alerts
-- Total inventory value calculations
-- Sales summary with daily/monthly analytics
-- Comprehensive data summaries and averages
+### Search Results
+- Clean, formatted table display
+- Total result count
+- Comprehensive product information including supplier details
 
-### **Phase 7: Data Persistence**
-- Automatic data loading on startup
-- Automatic data saving on exit
-- Data Management sub-menu for manual operations
-- File-based storage using Java Serialization
-- Support for products.dat, suppliers.dat, and orders.dat
+## 📊 Report Export Functionality
 
-## 🏗️ **Project Structure**
+### Exportable Reports
+1. **Low Stock Report**: Products below reorder level
+2. **Inventory Value Report**: Complete inventory with calculated values
 
+### Export Features
+- CSV format output
+- Timestamped filenames
+- Automatic exports directory creation
+- Success confirmation messages
+
+### Export Location
+- Files saved in `/exports` folder
+- Naming convention: `report_type_YYYYMMDD_HHMMSS.csv`
+
+## 🏗️ System Architecture
+
+### Core Components
 ```
-Inventory-Management-System/
-├── src/
-│   └── com/
-│       └── inventory/
-│           ├── Main.java                    # Application entry point with complete menu system
-│           ├── DataStore.java               # Data persistence and file management
-│           ├── models/
-│           │   ├── Product.java             # Product data model with full CRUD support
-│           │   ├── Supplier.java            # Supplier data model with full CRUD support
-│           │   └── Order.java               # Order data model for sales tracking
-│           └── managers/
-│               ├── InventoryManager.java    # Complete product and stock management
-│               ├── SupplierManager.java     # Complete supplier management logic
-│               ├── OrderManager.java        # Complete sales and orders logic
-│               └── ReportManager.java       # Complete reporting and analytics
-├── LICENSE
-└── README.md
+src/com/inventory/
+├── Main.java                 # Main application entry point
+├── DataStore.java            # Data persistence layer
+├── managers/                 # Business logic managers
+│   ├── InventoryManager.java # Product & stock management
+│   ├── SupplierManager.java  # Supplier operations
+│   ├── OrderManager.java     # Sales & order processing
+│   ├── ReportManager.java    # Reporting & analytics
+│   └── UserManager.java      # User authentication & management
+└── models/                   # Data models
+    ├── Product.java          # Product entity
+    ├── Supplier.java         # Supplier entity
+    ├── Order.java            # Order entity
+    └── User.java             # User entity
 ```
 
-## 🎯 **Main Menu Options**
+### Data Files
+- `products.dat` - Product inventory data
+- `suppliers.dat` - Supplier information
+- `orders.dat` - Order history
+- `users.dat` - User accounts and credentials
 
-1. **Product Management** - Full CRUD operations for products
-2. **Stock Management** - Stock monitoring and adjustments
-3. **Supplier Management** - Full CRUD operations for suppliers
-4. **Sales & Orders** - Order creation and sales processing
-5. **Reports & Analytics** - Comprehensive business intelligence
-6. **Data Management** - Data persistence operations
-7. **Exit** - Save data and close application
+## 🚀 Getting Started
 
-## 🔧 **Technical Details**
-
-- **Language**: Java 8+
-- **Architecture**: Object-Oriented with Manager pattern
-- **Data Storage**: In-memory with file-based persistence
-- **Serialization**: Java Serializable interface
-- **Input Validation**: Comprehensive error handling
-- **User Interface**: Console-based with formatted tables
-
-### **Data Models**
-- **Product**: ID, Name, Price, Quantity, Reorder Level
-- **Supplier**: ID, Name, Contact Information
-- **Order**: ID, Product ID, Quantity, Total Amount
-
-### **Data Persistence**
-- **File Format**: Binary (.dat files)
-- **Storage Location**: Application root directory
-- **Auto-save**: On application exit
-- **Auto-load**: On application startup
-- **File Management**: View info, manual save, delete operations
-
-## 🚀 **Getting Started**
-
-### **Prerequisites**
+### Prerequisites
 - Java 8 or higher
-- Git (for version control)
+- Windows/Linux/macOS
 
-### **Compilation**
+### Compilation
 ```bash
-javac -d . src/com/inventory/Main.java src/com/inventory/models/*.java src/com/inventory/managers/*.java src/com/inventory/DataStore.java
+javac -cp src src/com/inventory/Main.java
 ```
 
-### **Execution**
+### Execution
 ```bash
-java com.inventory.Main
+java -cp src com.inventory.Main
 ```
 
-## 📊 **Usage Examples**
+## 🧪 Testing Instructions
 
-### **Adding a Product**
-1. Select "Product Management" → "Add Product"
-2. Enter product details (name, price, quantity, reorder level)
-3. Product is automatically saved and assigned a unique ID
+### 1. User Authentication Testing
 
-### **Creating an Order**
-1. Select "Sales & Orders" → "Create New Order"
-2. Choose product from available inventory
-3. Enter quantity (validated against available stock)
-4. Order is created and stock is automatically reduced
+#### Login Test
+1. Run the application
+2. Enter credentials: `admin` / `admin123`
+3. Verify successful login message
+4. Test invalid credentials (should show remaining attempts)
 
-### **Viewing Reports**
-1. Select "Reports & Analytics"
-2. Choose report type (Low Stock, Inventory Value, Sales Summary)
-3. View formatted data with summaries and insights
+#### Role-Based Access Test
+1. Login as admin
+2. Navigate to Product Management → Delete Product
+3. Verify deletion is allowed
+4. Create a staff account via User Management
+5. Logout and login as staff
+6. Try to delete a product (should be denied)
 
-### **Managing Data Persistence**
-1. Select "Data Management"
-2. Choose operation (Save All, View Info, Delete Files)
-3. Data is automatically managed and persisted
+### 2. Search & Filtering Testing
 
-## 🔍 **Testing the System**
+#### Product Search Test
+1. Add several products with different names, prices, and suppliers
+2. Test name search with partial matches
+3. Test price range search with various ranges
+4. Test supplier ID search
+5. Verify search results display correctly
 
-### **Phase 7 Testing (Data Persistence)**
-1. **Add sample data**: Products, suppliers, and orders
-2. **Exit application**: Data automatically saves to .dat files
-3. **Restart application**: Data automatically loads from .dat files
-4. **Verify persistence**: Check that all data is maintained between runs
-5. **Test Data Management menu**: Manual save, view file info, delete operations
+#### Enhanced Search Test
+1. Navigate to Product Management → Search Products
+2. Test all search options (1-4)
+3. Verify "View Products by Supplier" functionality
+4. Check that empty results are handled gracefully
 
-### **Complete System Testing**
-1. **Product Management**: Add, view, update, delete products
-2. **Stock Management**: Monitor levels, add/remove stock
-3. **Supplier Management**: Add, view, update, delete suppliers
-4. **Sales & Orders**: Create orders, process sales, view history
-5. **Reports & Analytics**: Generate all report types
-6. **Data Persistence**: Verify data survives application restarts
+### 3. Report Export Testing
 
-## 🎉 **Achievements**
+#### Low Stock Report Export
+1. Create products with low stock levels
+2. Navigate to Reports & Analytics → Export Low Stock Report
+3. Verify exports directory is created
+4. Check CSV file is generated with correct data
+5. Verify success confirmation message
 
-This system demonstrates:
-- **Complete CRUD operations** for all entities
-- **Professional error handling** and input validation
-- **Comprehensive business logic** for inventory management
-- **Advanced reporting** and analytics capabilities
-- **Enterprise-level data persistence** with automatic management
-- **Scalable architecture** following best practices
-- **User-friendly interface** with intuitive navigation
+#### Inventory Value Report Export
+1. Navigate to Reports & Analytics → Export Inventory Value Report
+2. Verify CSV file is generated
+3. Check that all products are included
+4. Verify calculated values are correct
 
-## 🔮 **Future Enhancements**
+### 4. Data Persistence Testing
 
-Potential areas for expansion:
-- **Database integration** (MySQL, PostgreSQL)
-- **Web-based interface** (Spring Boot, React)
-- **Advanced analytics** (charts, graphs, trends)
-- **User authentication** and role-based access
-- **Email notifications** for low stock alerts
-- **Barcode scanning** integration
-- **Multi-location** inventory support
-- **API endpoints** for external integrations
+#### Save/Load Test
+1. Add products, suppliers, and users
+2. Exit the application
+3. Restart and verify data is loaded
+4. Check that all information is preserved
 
-## 📝 **License**
+#### File Management Test
+1. Navigate to Data Management (admin only)
+2. View data file information
+3. Test save all data functionality
+4. Verify file sizes and existence
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+### 5. User Management Testing
+
+#### Create User Test
+1. Login as admin
+2. Navigate to User Management → Create New User
+3. Create a staff account
+4. Verify user is saved and can be viewed
+
+#### Password Change Test
+1. Login as any user
+2. Navigate to User Management → Change Password
+3. Enter current password correctly
+4. Set new password
+5. Logout and verify new password works
+
+### 6. Integration Testing
+
+#### Complete Workflow Test
+1. Login as admin
+2. Add suppliers
+3. Add products with supplier assignments
+4. Create orders and process sales
+5. Generate and export reports
+6. Verify all data persists between sessions
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+#### Compilation Errors
+- Ensure Java 8+ is installed
+- Check all source files are in correct package structure
+- Verify import statements are correct
+
+#### Runtime Errors
+- Check file permissions for data files
+- Ensure exports directory can be created
+- Verify input validation is working correctly
+
+#### Data Persistence Issues
+- Check if data files are corrupted
+- Verify file paths are correct
+- Ensure sufficient disk space
+
+### Debug Mode
+- Check console output for detailed error messages
+- Verify data file existence and permissions
+- Test individual components in isolation
+
+## 📝 Code Quality Features
+
+### Input Validation
+- Comprehensive error checking
+- User-friendly error messages
+- Input sanitization
+
+### Error Handling
+- Graceful degradation
+- Informative error messages
+- Data integrity protection
+
+### Code Organization
+- Modular design
+- Clear separation of concerns
+- Consistent naming conventions
+
+## 🔮 Future Enhancements
+
+### Potential Phase 9 Features
+- Database integration
+- Web-based interface
+- Advanced analytics
+- Barcode scanning
+- Email notifications
+- Multi-warehouse support
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
 ---
 
-**🎯 Phase 7 Complete!** Your Inventory Management System now has enterprise-level functionality with persistent data storage! 🚀
+**Note**: This system is designed for educational and demonstration purposes. For production use, consider implementing additional security measures such as password hashing, database encryption, and audit logging.

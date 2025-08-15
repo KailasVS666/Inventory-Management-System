@@ -8,6 +8,7 @@ public class Product implements Serializable {
     private double price;
     private int quantity;
     private int reorderLevel;
+    private String supplierId; // Added for Phase 8
     
     public Product(String id, String name, double price, int quantity, int reorderLevel) {
         this.id = id;
@@ -15,6 +16,16 @@ public class Product implements Serializable {
         this.price = price;
         this.quantity = quantity;
         this.reorderLevel = reorderLevel;
+        this.supplierId = ""; // Default empty supplier ID
+    }
+    
+    public Product(String id, String name, double price, int quantity, int reorderLevel, String supplierId) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+        this.quantity = quantity;
+        this.reorderLevel = reorderLevel;
+        this.supplierId = supplierId;
     }
     
     // Getters
@@ -51,13 +62,21 @@ public class Product implements Serializable {
         this.quantity = quantity;
     }
     
-    public void setReorderLevel(int reorderLevel) {
+        public void setReorderLevel(int reorderLevel) {
         this.reorderLevel = reorderLevel;
+    }
+    
+    public String getSupplierId() {
+        return supplierId;
+    }
+    
+    public void setSupplierId(String supplierId) {
+        this.supplierId = supplierId;
     }
     
     @Override
     public String toString() {
-        return String.format("Product{id='%s', name='%s', price=%.2f, quantity=%d, reorderLevel=%d}", 
-                           id, name, price, quantity, reorderLevel);
+        return String.format("Product{id='%s', name='%s', price=%.2f, quantity=%d, reorderLevel=%d, supplierId='%s'}",
+                           id, name, price, quantity, reorderLevel, supplierId);
     }
 }

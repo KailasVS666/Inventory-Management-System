@@ -10,6 +10,7 @@ public class DataStore {
     public static final String PRODUCTS_FILE = "products.dat";
     public static final String SUPPLIERS_FILE = "suppliers.dat";
     public static final String ORDERS_FILE = "orders.dat";
+    public static final String USERS_FILE = "users.dat"; // Added for Phase 8
     
     /**
      * Save data to a file using Java Serialization
@@ -95,7 +96,7 @@ public class DataStore {
         StringBuilder info = new StringBuilder();
         info.append("\n=== Data File Information ===\n");
         
-        String[] files = {PRODUCTS_FILE, SUPPLIERS_FILE, ORDERS_FILE};
+        String[] files = {PRODUCTS_FILE, SUPPLIERS_FILE, ORDERS_FILE, USERS_FILE};
         for (String fileName : files) {
             File file = new File(fileName);
             if (file.exists()) {

@@ -3,6 +3,7 @@ package com.inventory.managers;
 import java.util.*;
 import java.util.Scanner;
 import com.inventory.models.Product;
+import com.inventory.DataStore;
 
 public class InventoryManager {
     private List<Product> products;
@@ -11,6 +12,7 @@ public class InventoryManager {
     public InventoryManager() {
         this.products = new ArrayList<>();
         this.productIdCounter = 1;
+        loadProducts();
     }
     
     // Product Management Methods
@@ -396,5 +398,46 @@ public class InventoryManager {
     // Getter method to access products list for reports
     public List<Product> getProducts() {
         return new ArrayList<>(products);
+    }
+    
+    // Data Persistence Methods
+    private void loadProducts() {
+        List<Product> loadedProducts = DataStore.loadData(DataStore.PRODUCTS_FILE);
+        if (loadedProducts != null) {
+            this.products = loadedProducts;
+            // Update product ID counter to avoid conflicts
+            updateProductIdCounter();
+            System.out.println("✓ Loaded " + products.size() + " products from storage");
+        } else {
+            System.out.println("ℹ Starting with empty product inventory");
+        }
+    }
+    
+    public void saveProducts() {
+        boolean success = DataStore.saveData(DataStore.PRODUCTS_FILE, products);
+        if (success) {
+            System.out.println("✓ Product inventory saved successfully");
+        } else {
+            System.err.println("✗ Failed to save product inventory");
+        }
+    }
+    
+    private void updateProductIdCounter() {
+        if (!products.isEmpty()) {
+            // Find the highest product ID number and set counter accordingly
+            int maxId = 0;
+            for (Product product : products) {
+                try {
+                    String idStr = product.getId().substring(1); // Remove 'P' prefix
+                    int idNum = Integer.parseInt(idStr);
+                    if (idNum > maxId) {
+                        maxId = idNum;
+                    }
+                } catch (NumberFormatException e) {
+                    // Skip invalid IDs
+                }
+            }
+            this.productIdCounter = maxId + 1;
+        }
     }
 }

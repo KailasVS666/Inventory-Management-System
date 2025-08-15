@@ -3,6 +3,7 @@ package com.inventory.managers;
 import java.util.*;
 import java.util.Scanner;
 import com.inventory.models.Supplier;
+import com.inventory.DataStore;
 
 public class SupplierManager {
     private List<Supplier> suppliers;
@@ -11,6 +12,7 @@ public class SupplierManager {
     public SupplierManager() {
         this.suppliers = new ArrayList<>();
         this.supplierIdCounter = 1;
+        loadSuppliers();
     }
     
     // Supplier Management Methods
@@ -151,5 +153,46 @@ public class SupplierManager {
             }
         }
         return null;
+    }
+    
+    // Data Persistence Methods
+    private void loadSuppliers() {
+        List<Supplier> loadedSuppliers = DataStore.loadData(DataStore.SUPPLIERS_FILE);
+        if (loadedSuppliers != null) {
+            this.suppliers = loadedSuppliers;
+            // Update supplier ID counter to avoid conflicts
+            updateSupplierIdCounter();
+            System.out.println("✓ Loaded " + suppliers.size() + " suppliers from storage");
+        } else {
+            System.out.println("ℹ Starting with empty supplier list");
+        }
+    }
+    
+    public void saveSuppliers() {
+        boolean success = DataStore.saveData(DataStore.SUPPLIERS_FILE, suppliers);
+        if (success) {
+            System.out.println("✓ Supplier data saved successfully");
+        } else {
+            System.err.println("✗ Failed to save supplier data");
+        }
+    }
+    
+    private void updateSupplierIdCounter() {
+        if (!suppliers.isEmpty()) {
+            // Find the highest supplier ID number and set counter accordingly
+            int maxId = 0;
+            for (Supplier supplier : suppliers) {
+                try {
+                    String idStr = supplier.getId().substring(1); // Remove 'S' prefix
+                    int idNum = Integer.parseInt(idStr);
+                    if (idNum > maxId) {
+                        maxId = idNum;
+                    }
+                } catch (NumberFormatException e) {
+                    // Skip invalid IDs
+                }
+            }
+            this.supplierIdCounter = maxId + 1;
+        }
     }
 }

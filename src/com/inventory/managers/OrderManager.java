@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.Scanner;
 import com.inventory.models.Order;
 import com.inventory.models.Product;
+import com.inventory.DataStore;
 
 public class OrderManager {
     private List<Order> orders;
@@ -14,6 +15,7 @@ public class OrderManager {
         this.orders = new ArrayList<>();
         this.orderIdCounter = 1;
         this.inventoryManager = inventoryManager;
+        loadOrders();
     }
     
     // Sales & Orders Methods
@@ -190,5 +192,46 @@ public class OrderManager {
     // Getter method to access orders list for reports
     public List<Order> getOrders() {
         return new ArrayList<>(orders);
+    }
+    
+    // Data Persistence Methods
+    private void loadOrders() {
+        List<Order> loadedOrders = DataStore.loadData(DataStore.ORDERS_FILE);
+        if (loadedOrders != null) {
+            this.orders = loadedOrders;
+            // Update order ID counter to avoid conflicts
+            updateOrderIdCounter();
+            System.out.println("✓ Loaded " + orders.size() + " orders from storage");
+        } else {
+            System.out.println("ℹ Starting with empty order history");
+        }
+    }
+    
+    public void saveOrders() {
+        boolean success = DataStore.saveData(DataStore.ORDERS_FILE, orders);
+        if (success) {
+            System.out.println("✓ Order data saved successfully");
+        } else {
+            System.err.println("✗ Failed to save order data");
+        }
+    }
+    
+    private void updateOrderIdCounter() {
+        if (!orders.isEmpty()) {
+            // Find the highest order ID number and set counter accordingly
+            int maxId = 0;
+            for (Order order : orders) {
+                try {
+                    String idStr = order.getId().substring(1); // Remove 'O' prefix
+                    int idNum = Integer.parseInt(idStr);
+                    if (idNum > maxId) {
+                        maxId = idNum;
+                    }
+                } catch (NumberFormatException e) {
+                    // Skip invalid IDs
+                }
+            }
+            this.orderIdCounter = maxId + 1;
+        }
     }
 }

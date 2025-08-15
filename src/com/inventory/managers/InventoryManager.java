@@ -392,4 +392,9 @@ public class InventoryManager {
         }
         return null;
     }
+    
+    // Getter method to access products list for reports
+    public List<Product> getProducts() {
+        return new ArrayList<>(products);
+    }
 }

@@ -186,4 +186,9 @@ public class OrderManager {
         // In a real application, you might want to create a shared data access layer
         return inventoryManager.findProductById(productId);
     }
+    
+    // Getter method to access orders list for reports
+    public List<Order> getOrders() {
+        return new ArrayList<>(orders);
+    }
 }

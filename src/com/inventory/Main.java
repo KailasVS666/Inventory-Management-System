@@ -4,21 +4,23 @@ import java.util.Scanner;
 import com.inventory.managers.InventoryManager;
 import com.inventory.managers.SupplierManager;
 import com.inventory.managers.OrderManager;
+import com.inventory.managers.ReportManager;
 
 public class Main {
     private static InventoryManager inventoryManager = new InventoryManager();
     private static SupplierManager supplierManager = new SupplierManager();
     private static OrderManager orderManager = new OrderManager(inventoryManager);
+    private static ReportManager reportManager = new ReportManager(inventoryManager, orderManager);
     
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         boolean running = true;
         
-        System.out.println("=== Inventory Management System - Phase 5 ===");
+        System.out.println("=== Inventory Management System - Phase 6 ===");
         
         while (running) {
             displayMenu();
-            System.out.print("Enter your choice (1-6): ");
+            System.out.print("Enter your choice (1-7): ");
             
             try {
                 int choice = scanner.nextInt();
@@ -38,7 +40,7 @@ public class Main {
                         salesAndOrdersMenu(scanner);
                         break;
                     case 5:
-                        System.out.println("Reports selected - Placeholder functionality");
+                        reportsAndAnalyticsMenu(scanner);
                         break;
                     case 6:
                         System.out.println("Exiting Inventory Management System...");
@@ -70,7 +72,7 @@ public class Main {
         System.out.println("2. Stock Management");
         System.out.println("3. Supplier Management");
         System.out.println("4. Sales & Orders");
-        System.out.println("5. Reports");
+        System.out.println("5. Reports & Analytics");
         System.out.println("6. Exit");
         System.out.println("=================");
     }
@@ -242,6 +244,50 @@ public class Main {
                         break;
                     case 3:
                         orderManager.processDirectSale(scanner);
+                        break;
+                    case 4:
+                        inMenu = false;
+                        break;
+                    default:
+                        System.out.println("Invalid choice. Please enter a number between 1 and 4.");
+                        break;
+                }
+                
+                if (inMenu) {
+                    System.out.println("\nPress Enter to continue...");
+                    scanner.nextLine();
+                }
+                
+            } catch (Exception e) {
+                System.out.println("Invalid input. Please enter a valid number.");
+                scanner.nextLine(); // Clear the invalid input
+            }
+        }
+    }
+    
+    private static void reportsAndAnalyticsMenu(Scanner scanner) {
+        boolean inMenu = true;
+        while (inMenu) {
+            System.out.println("\n=== Reports & Analytics ===");
+            System.out.println("1. View Low Stock Products");
+            System.out.println("2. View Total Inventory Value");
+            System.out.println("3. View Sales Summary");
+            System.out.println("4. Back to Main Menu");
+            System.out.print("Enter your choice (1-4): ");
+            
+            try {
+                int choice = scanner.nextInt();
+                scanner.nextLine(); // Consume newline
+                
+                switch (choice) {
+                    case 1:
+                        reportManager.viewLowStockProducts();
+                        break;
+                    case 2:
+                        reportManager.viewTotalInventoryValue();
+                        break;
+                    case 3:
+                        reportManager.viewSalesSummary();
                         break;
                     case 4:
                         inMenu = false;

@@ -623,4 +623,43 @@ public class InventoryManager {
         
         displaySearchResults(results, "Supplier: " + supplierId);
     }
+
+    // === GUI Integration Methods ===
+    /**
+     * Generate a new unique product ID (e.g., P001, P002, ...)
+     */
+    public String generateProductId() {
+        String id = "P" + String.format("%03d", productIdCounter++);
+        return id;
+    }
+
+    /**
+     * Add a new product (GUI version)
+     */
+    public void addProduct(Product product) {
+        products.add(product);
+        saveProducts();
+    }
+
+    /**
+     * Update an existing product (GUI version)
+     * Finds the product by ID and updates its fields.
+     */
+    public void updateProduct(Product updatedProduct) {
+        for (int i = 0; i < products.size(); i++) {
+            if (products.get(i).getId().equals(updatedProduct.getId())) {
+                products.set(i, updatedProduct);
+                saveProducts();
+                return;
+            }
+        }
+    }
+
+    /**
+     * Delete a product by ID (GUI version)
+     */
+    public void deleteProduct(String id) {
+        products.removeIf(p -> p.getId().equals(id));
+        saveProducts();
+    }
 }

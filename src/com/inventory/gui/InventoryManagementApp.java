@@ -65,9 +65,8 @@ public class InventoryManagementApp extends Application {
     }
     
     public void showLoginScreen() {
-        if (loginScreen == null) {
-            loginScreen = new LoginScreen(this);
-        }
+        // Create new instance each time to avoid VBox reuse error
+        loginScreen = new LoginScreen(this);
         
         Scene scene = new Scene(loginScreen.getRoot());
         primaryStage.setScene(scene);
@@ -75,11 +74,38 @@ public class InventoryManagementApp extends Application {
     }
     
     public void showDashboard() {
-        if (dashboardScreen == null) {
-            dashboardScreen = new DashboardScreen(this);
-        }
+        // Create new instance each time to avoid VBox reuse error
+        dashboardScreen = new DashboardScreen(this);
         
         Scene scene = new Scene(dashboardScreen.getRoot());
+        primaryStage.setScene(scene);
+        primaryStage.centerOnScreen();
+    }
+    
+    public void showProductsScreen() {
+        ProductsScreen productsScreen = new ProductsScreen(this);
+        Scene scene = new Scene(productsScreen.getRoot());
+        primaryStage.setScene(scene);
+        primaryStage.centerOnScreen();
+    }
+    
+    public void showSuppliersScreen() {
+        SuppliersScreen suppliersScreen = new SuppliersScreen(this);
+        Scene scene = new Scene(suppliersScreen.getRoot());
+        primaryStage.setScene(scene);
+        primaryStage.centerOnScreen();
+    }
+    
+    public void showOrdersScreen() {
+        OrdersScreen ordersScreen = new OrdersScreen(this);
+        Scene scene = new Scene(ordersScreen.getRoot());
+        primaryStage.setScene(scene);
+        primaryStage.centerOnScreen();
+    }
+    
+    public void showReportsScreen() {
+        ReportsScreen reportsScreen = new ReportsScreen(this);
+        Scene scene = new Scene(reportsScreen.getRoot());
         primaryStage.setScene(scene);
         primaryStage.centerOnScreen();
     }

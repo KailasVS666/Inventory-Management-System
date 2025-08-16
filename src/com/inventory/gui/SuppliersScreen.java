@@ -161,26 +161,26 @@ public class SuppliersScreen {
         buttonContainer.setPadding(new Insets(20));
         
         // Add button
-        Button addBtn = new Button("Add Supplier");
+        Button addBtn = new Button("➕ Add Supplier");
         addBtn.setPrefSize(120, 40);
         addBtn.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
         addBtn.setOnAction(e -> addSupplier());
         
         // Update button
-        Button updateBtn = new Button("Update Supplier");
+        Button updateBtn = new Button("✏️ Update Supplier");
         updateBtn.setPrefSize(120, 40);
         updateBtn.setStyle("-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
         updateBtn.setOnAction(e -> updateSupplier());
         
         // Delete button (admin only)
-        Button deleteBtn = new Button("Delete Supplier");
+        Button deleteBtn = new Button("🗑️ Delete Supplier");
         deleteBtn.setPrefSize(120, 40);
         deleteBtn.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
         deleteBtn.setOnAction(e -> deleteSupplier());
         deleteBtn.setVisible(userManager.getCurrentUser() != null && userManager.getCurrentUser().canDelete());
         
         // Clear form button
-        Button clearBtn = new Button("Clear Form");
+        Button clearBtn = new Button("💾 Clear Form");
         clearBtn.setPrefSize(120, 40);
         clearBtn.setStyle("-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
         clearBtn.setOnAction(e -> clearForm());
@@ -205,10 +205,9 @@ public class SuppliersScreen {
     
     private void loadSuppliersData() {
         try {
-            // TODO: Get suppliers from SupplierManager
-            // For now, create some sample data
+            List<Supplier> suppliers = supplierManager.getSuppliers();
             suppliersData.clear();
-            // suppliersData.addAll(supplierManager.getSuppliers());
+            suppliersData.addAll(suppliers);
         } catch (Exception e) {
             InventoryManagementApp.showError("Error", "Failed to load suppliers", e.getMessage());
         }
@@ -240,9 +239,14 @@ public class SuppliersScreen {
                 return;
             }
             
-            // TODO: Call supplierManager.addSupplier() with the form data
-            // For now, show a placeholder message
-            InventoryManagementApp.showInfo("Add Supplier", "Supplier Added", "Supplier will be added when integration is complete.");
+            Supplier newSupplier = new Supplier(
+                supplierManager.generateSupplierId(),
+                nameField.getText().trim(),
+                contactInfoField.getText().trim()
+            );
+            
+            supplierManager.addSupplier(newSupplier);
+            InventoryManagementApp.showInfo("Add Supplier", "Supplier Added", "Supplier successfully added.");
             
             clearForm();
             loadSuppliersData();
@@ -271,9 +275,11 @@ public class SuppliersScreen {
                 return;
             }
             
-            // TODO: Call supplierManager.updateSupplier() with the form data
-            // For now, show a placeholder message
-            InventoryManagementApp.showInfo("Update Supplier", "Supplier Updated", "Supplier will be updated when integration is complete.");
+            selectedSupplier.setName(nameField.getText().trim());
+            selectedSupplier.setContactInfo(contactInfoField.getText().trim());
+            
+            supplierManager.updateSupplier(selectedSupplier);
+            InventoryManagementApp.showInfo("Update Supplier", "Supplier Updated", "Supplier successfully updated.");
             
             clearForm();
             loadSuppliersData();
@@ -293,9 +299,8 @@ public class SuppliersScreen {
         InventoryManagementApp.showConfirmation("Delete Supplier", "Confirm Deletion", 
             "Are you sure you want to delete '" + selectedSupplier.getName() + "'?", () -> {
                 try {
-                    // TODO: Call supplierManager.deleteSupplier() with the selected supplier
-                    // For now, show a placeholder message
-                    InventoryManagementApp.showInfo("Delete Supplier", "Supplier Deleted", "Supplier will be deleted when integration is complete.");
+                    supplierManager.deleteSupplier(selectedSupplier.getId());
+                    InventoryManagementApp.showInfo("Delete Supplier", "Supplier Deleted", "Supplier successfully deleted.");
                     
                     clearForm();
                     loadSuppliersData();

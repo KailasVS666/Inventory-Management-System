@@ -14,6 +14,8 @@ import com.inventory.models.Product;
 import com.inventory.managers.InventoryManager;
 import com.inventory.managers.UserManager;
 import java.util.List;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 public class ProductsScreen {
     
@@ -125,13 +127,13 @@ public class ProductsScreen {
         supplierSearch.getChildren().addAll(supplierLabel, supplierSearchField);
         
         // Search button
-        Button searchBtn = new Button("Search");
+        Button searchBtn = new Button("🔍 Search");
         searchBtn.setPrefSize(100, 35);
         searchBtn.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
         searchBtn.setOnAction(e -> performSearch(nameSearchField.getText(), minPriceField.getText(), maxPriceField.getText(), supplierSearchField.getText()));
         
         // Clear search button
-        Button clearBtn = new Button("Clear");
+        Button clearBtn = new Button("🔄 Clear");
         clearBtn.setPrefSize(100, 35);
         clearBtn.setStyle("-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
         clearBtn.setOnAction(e -> {
@@ -145,8 +147,6 @@ public class ProductsScreen {
         HBox searchButtons = new HBox(10);
         searchButtons.setAlignment(Pos.CENTER);
         searchButtons.getChildren().addAll(searchBtn, clearBtn);
-        
-        searchFields.getChildren().addAll(nameSearch, priceSearch, supplierSearch);
         
         searchContainer.getChildren().addAll(searchTitle, searchFields, searchButtons);
         root.getChildren().add(searchContainer);
@@ -312,29 +312,33 @@ public class ProductsScreen {
         buttonContainer.setPadding(new Insets(20));
         
         // Add button
-        Button addBtn = new Button("Add Product");
+        Button addBtn = new Button("➕ Add Product");
         addBtn.setPrefSize(120, 40);
         addBtn.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
         addBtn.setOnAction(e -> addProduct());
+        addBtn.setTooltip(new Tooltip("Add New Product (Ctrl+N)"));
         
         // Update button
-        Button updateBtn = new Button("Update Product");
+        Button updateBtn = new Button("✏️ Update Product");
         updateBtn.setPrefSize(120, 40);
         updateBtn.setStyle("-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
         updateBtn.setOnAction(e -> updateProduct());
+        updateBtn.setTooltip(new Tooltip("Update Selected Product (Ctrl+U)"));
         
         // Delete button (admin only)
-        Button deleteBtn = new Button("Delete Product");
+        Button deleteBtn = new Button("🗑️ Delete Product");
         deleteBtn.setPrefSize(120, 40);
         deleteBtn.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
         deleteBtn.setOnAction(e -> deleteProduct());
         deleteBtn.setVisible(userManager.getCurrentUser() != null && userManager.getCurrentUser().canDelete());
+        deleteBtn.setTooltip(new Tooltip("Delete Selected Product (Ctrl+D)"));
         
         // Clear form button
-        Button clearBtn = new Button("Clear Form");
+        Button clearBtn = new Button("💾 Clear Form");
         clearBtn.setPrefSize(120, 40);
         clearBtn.setStyle("-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
         clearBtn.setOnAction(e -> clearForm());
+        clearBtn.setTooltip(new Tooltip("Clear Form (Ctrl+C)"));
         
         buttonContainer.getChildren().addAll(addBtn, updateBtn, deleteBtn, clearBtn);
         root.getChildren().add(buttonContainer);
@@ -349,6 +353,7 @@ public class ProductsScreen {
         backBtn.setPrefSize(150, 40);
         backBtn.setStyle("-fx-background-color: #34495e; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
         backBtn.setOnAction(e -> app.showDashboard());
+        backBtn.setTooltip(new Tooltip("Back to Dashboard (Ctrl+B)"));
         
         backContainer.getChildren().add(backBtn);
         root.getChildren().add(backContainer);
@@ -421,9 +426,17 @@ public class ProductsScreen {
                 return;
             }
             
-            // TODO: Call inventoryManager.addProduct() with the form data
-            // For now, show a placeholder message
-            InventoryManagementApp.showInfo("Add Product", "Product Added", "Product will be added when integration is complete.");
+            Product newProduct = new Product(
+                inventoryManager.generateProductId(), // Generate a new ID
+                nameField.getText().trim(),
+                price,
+                quantity,
+                reorderLevel,
+                supplierId
+            );
+            
+            inventoryManager.addProduct(newProduct);
+            InventoryManagementApp.showInfo("Add Product", "Product Added", "Product successfully added to inventory.");
             
             clearForm();
             loadProductsData();
@@ -459,9 +472,14 @@ public class ProductsScreen {
                 return;
             }
             
-            // TODO: Call inventoryManager.updateProduct() with the form data
-            // For now, show a placeholder message
-            InventoryManagementApp.showInfo("Update Product", "Product Updated", "Product will be updated when integration is complete.");
+            selectedProduct.setName(nameField.getText().trim());
+            selectedProduct.setPrice(price);
+            selectedProduct.setQuantity(quantity);
+            selectedProduct.setReorderLevel(reorderLevel);
+            selectedProduct.setSupplierId(supplierId);
+            
+            inventoryManager.updateProduct(selectedProduct);
+            InventoryManagementApp.showInfo("Update Product", "Product Updated", "Product successfully updated.");
             
             clearForm();
             loadProductsData();
@@ -483,9 +501,8 @@ public class ProductsScreen {
         InventoryManagementApp.showConfirmation("Delete Product", "Confirm Deletion", 
             "Are you sure you want to delete '" + selectedProduct.getName() + "'?", () -> {
                 try {
-                    // TODO: Call inventoryManager.deleteProduct() with the selected product
-                    // For now, show a placeholder message
-                    InventoryManagementApp.showInfo("Delete Product", "Product Deleted", "Product will be deleted when integration is complete.");
+                    inventoryManager.deleteProduct(selectedProduct.getId());
+                    InventoryManagementApp.showInfo("Delete Product", "Product Deleted", "Product successfully deleted.");
                     
                     clearForm();
                     loadProductsData();

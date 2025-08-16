@@ -150,6 +150,53 @@ public class SupplierManager {
         }
     }
     
+    // === GUI Integration Methods ===
+    /**
+     * Generate a new unique supplier ID (e.g., S001, S002, ...)
+     */
+    public String generateSupplierId() {
+        String id = "S" + String.format("%03d", supplierIdCounter++);
+        return id;
+    }
+    
+    /**
+     * Add a new supplier (GUI version)
+     */
+    public void addSupplier(Supplier supplier) {
+        suppliers.add(supplier);
+        saveSuppliers();
+    }
+    
+    /**
+     * Update an existing supplier (GUI version)
+     * Finds the supplier by ID and updates its fields.
+     */
+    public void updateSupplier(Supplier updatedSupplier) {
+        for (int i = 0; i < suppliers.size(); i++) {
+            if (suppliers.get(i).getId().equals(updatedSupplier.getId())) {
+                suppliers.set(i, updatedSupplier);
+                saveSuppliers();
+                return;
+            }
+        }
+        throw new IllegalArgumentException("Supplier not found with ID: " + updatedSupplier.getId());
+    }
+    
+    /**
+     * Delete a supplier by ID (GUI version)
+     */
+    public void deleteSupplier(String supplierId) {
+        suppliers.removeIf(supplier -> supplier.getId().equals(supplierId));
+        saveSuppliers();
+    }
+    
+    /**
+     * Get all suppliers (GUI version)
+     */
+    public List<Supplier> getSuppliers() {
+        return new ArrayList<>(suppliers);
+    }
+    
     // Helper method to find supplier by ID
     private Supplier findSupplierById(String id) {
         for (Supplier supplier : suppliers) {

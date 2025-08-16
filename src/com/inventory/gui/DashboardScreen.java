@@ -145,12 +145,12 @@ public class DashboardScreen {
         footer.setAlignment(Pos.CENTER);
         footer.setPadding(new Insets(30, 0, 0, 0));
         
-        Button logoutBtn = new Button("Logout");
+        Button logoutBtn = new Button("🚪 Logout");
         logoutBtn.setPrefSize(100, 40);
         logoutBtn.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
         logoutBtn.setOnAction(e -> app.logout());
         
-        Button exitBtn = new Button("Exit");
+        Button exitBtn = new Button("❌ Exit");
         exitBtn.setPrefSize(100, 40);
         exitBtn.setStyle("-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
         exitBtn.setOnAction(e -> app.exit());
@@ -161,23 +161,19 @@ public class DashboardScreen {
     
     // Navigation methods - these will be implemented when we create the individual screens
     private void showProductsScreen() {
-        // TODO: Implement Products screen navigation
-        InventoryManagementApp.showInfo("Products", "Products Management", "Products screen will be implemented next.");
+        app.showProductsScreen();
     }
     
     private void showSuppliersScreen() {
-        // TODO: Implement Suppliers screen navigation
-        InventoryManagementApp.showInfo("Suppliers", "Suppliers Management", "Suppliers screen will be implemented next.");
+        app.showSuppliersScreen();
     }
     
     private void showOrdersScreen() {
-        // TODO: Implement Orders screen navigation
-        InventoryManagementApp.showInfo("Orders", "Orders & Sales", "Orders screen will be implemented next.");
+        app.showOrdersScreen();
     }
     
     private void showReportsScreen() {
-        // TODO: Implement Reports screen navigation
-        InventoryManagementApp.showInfo("Reports", "Reports & Analytics", "Reports screen will be implemented next.");
+        app.showReportsScreen();
     }
     
     private void showUsersScreen() {

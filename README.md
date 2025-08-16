@@ -1,261 +1,87 @@
-# Inventory Management System - Phase 8: Advanced Features
+# Inventory Management System
 
-A comprehensive Java console-based Inventory Management System with advanced features including user authentication, search & filtering, and report export functionality.
+A robust inventory management application built in Java with a modern JavaFX GUI. Designed for small businesses and organizations to efficiently manage products, suppliers, orders, sales, and reporting.
 
-## 🚀 Features Overview
+## Features
 
-### ✅ Completed Phases (1-7)
-- **Phase 1**: Product Management (Add, View, Update, Delete)
-- **Phase 2**: Stock Management (Check Levels, Add/Remove Stock, Reorder Levels)
-- **Phase 3**: Supplier Management (Add, View, Update, Delete)
-- **Phase 4**: Sales & Orders (Create Orders, Process Sales, Order History)
-- **Phase 5**: Reports & Analytics (Low Stock, Inventory Value, Sales Summary)
-- **Phase 6**: Data Persistence (Automatic Save/Load, File Management)
-- **Phase 7**: Enhanced UI & Validation (Input Validation, Error Handling)
+- Product Management: Add, edit, delete, and search products. Track stock, pricing, and reorder levels.
+- Supplier Management: Manage supplier details and relationships.
+- Order & Sales Management: Create orders, process direct sales, and update inventory in real time.
+- Reports & Analytics: Generate low stock, inventory value, and sales summary reports. Export reports to CSV.
+- User Authentication: Secure login with role-based access (admin/staff).
+- Data Persistence: All data is saved using Java serialization (.dat files).
+- Modern JavaFX GUI: Clean, responsive, and intuitive interface.
+- Table Views: All data is presented in sortable, scrollable tables.
+- CSV Export: Export reports for business analysis.
+- Validation & Error Handling: Prevents invalid data entry and provides clear feedback.
+- Low Stock Alerts: Warnings when products fall below reorder level.
 
-### 🆕 Phase 8: Advanced Features
-- **Search & Filtering**: Advanced product search capabilities
-- **User Authentication**: Role-based access control (Admin/Staff)
-- **Report Export**: CSV export functionality for reports
-- **Enhanced Security**: Permission-based operations
+## Getting Started
 
-## 🔐 User Authentication System
+### Requirements
 
-### User Roles
-- **Admin**: Full access to all features
-- **Staff**: Restricted access (cannot delete products/suppliers, no data management access)
+- Java 21 or higher
+- JavaFX 21 SDK (download from GluonHQ)
+- Windows, Mac, or Linux
 
-### Default Credentials
-- **Username**: `admin`
-- **Password**: `admin123`
+### Setup
 
-### Security Features
-- Login required before accessing any menu
-- Role-based permission system
-- Maximum 3 login attempts
-- Session management
+1. Clone the repository:
+   ```
+   git clone <your-repo-url>
+   cd Inventory-Management-System
+   ```
 
-## 🔍 Search & Filtering Features
+2. Download and extract JavaFX SDK.
+   Place it somewhere convenient (e.g., C:/Users/yourname/Documents/openjfx-21.0.2_windows-x64_bin-sdk/).
 
-### Product Search Options
-1. **Name Search**: Case-insensitive partial matching
-2. **Price Range**: Search by minimum and maximum price
-3. **Supplier ID**: Find products by specific supplier
-4. **View by Supplier**: Display all products from a specific supplier
+3. Compile the project:
+   ```
+   javac --module-path "C:/path/to/javafx-sdk-21.0.2/lib" --add-modules javafx.controls,javafx.fxml -cp "src" src/com/inventory/gui/*.java src/com/inventory/managers/*.java src/com/inventory/models/*.java src/com/inventory/*.java
+   ```
 
-### Search Results
-- Clean, formatted table display
-- Total result count
-- Comprehensive product information including supplier details
+4. Run the application:
+   ```
+   java --module-path "C:/path/to/javafx-sdk-21.0.2/lib" --add-modules javafx.controls,javafx.fxml -cp src com.inventory.gui.InventoryManagementApp
+   ```
 
-## 📊 Report Export Functionality
+## Usage
 
-### Exportable Reports
-1. **Low Stock Report**: Products below reorder level
-2. **Inventory Value Report**: Complete inventory with calculated values
+- Login with your credentials (admin/staff).
+- Use the dashboard to navigate to Products, Suppliers, Orders, and Reports.
+- Manage inventory, suppliers, and orders.
+- Generate and export business reports.
+- Logout or exit the application when done.
 
-### Export Features
-- CSV format output
-- Timestamped filenames
-- Automatic exports directory creation
-- Success confirmation messages
+## Project Structure
 
-### Export Location
-- Files saved in `/exports` folder
-- Naming convention: `report_type_YYYYMMDD_HHMMSS.csv`
+src/
+  com/inventory/
+    DataStore.java
+    Main.java
+    models/
+      Product.java
+      Supplier.java
+      Order.java
+      User.java
+    managers/
+      InventoryManager.java
+      SupplierManager.java
+      OrderManager.java
+      ReportManager.java
+      UserManager.java
+    gui/
+      InventoryManagementApp.java
+      DashboardScreen.java
+      ProductsScreen.java
+      SuppliersScreen.java
+      OrdersScreen.java
+      ReportsScreen.java
+      LoginScreen.java
 
-## 🏗️ System Architecture
+data files: products.dat, orders.dat, suppliers.dat, users.dat  
+exports: CSV files are saved in the exports/ directory.
 
-### Core Components
-```
-src/com/inventory/
-├── Main.java                 # Main application entry point
-├── DataStore.java            # Data persistence layer
-├── managers/                 # Business logic managers
-│   ├── InventoryManager.java # Product & stock management
-│   ├── SupplierManager.java  # Supplier operations
-│   ├── OrderManager.java     # Sales & order processing
-│   ├── ReportManager.java    # Reporting & analytics
-│   └── UserManager.java      # User authentication & management
-└── models/                   # Data models
-    ├── Product.java          # Product entity
-    ├── Supplier.java         # Supplier entity
-    ├── Order.java            # Order entity
-    └── User.java             # User entity
-```
+## License
 
-### Data Files
-- `products.dat` - Product inventory data
-- `suppliers.dat` - Supplier information
-- `orders.dat` - Order history
-- `users.dat` - User accounts and credentials
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Java 8 or higher
-- Windows/Linux/macOS
-
-### Compilation
-```bash
-javac -cp src src/com/inventory/Main.java
-```
-
-### Execution
-```bash
-java -cp src com.inventory.Main
-```
-
-## 🧪 Testing Instructions
-
-### 1. User Authentication Testing
-
-#### Login Test
-1. Run the application
-2. Enter credentials: `admin` / `admin123`
-3. Verify successful login message
-4. Test invalid credentials (should show remaining attempts)
-
-#### Role-Based Access Test
-1. Login as admin
-2. Navigate to Product Management → Delete Product
-3. Verify deletion is allowed
-4. Create a staff account via User Management
-5. Logout and login as staff
-6. Try to delete a product (should be denied)
-
-### 2. Search & Filtering Testing
-
-#### Product Search Test
-1. Add several products with different names, prices, and suppliers
-2. Test name search with partial matches
-3. Test price range search with various ranges
-4. Test supplier ID search
-5. Verify search results display correctly
-
-#### Enhanced Search Test
-1. Navigate to Product Management → Search Products
-2. Test all search options (1-4)
-3. Verify "View Products by Supplier" functionality
-4. Check that empty results are handled gracefully
-
-### 3. Report Export Testing
-
-#### Low Stock Report Export
-1. Create products with low stock levels
-2. Navigate to Reports & Analytics → Export Low Stock Report
-3. Verify exports directory is created
-4. Check CSV file is generated with correct data
-5. Verify success confirmation message
-
-#### Inventory Value Report Export
-1. Navigate to Reports & Analytics → Export Inventory Value Report
-2. Verify CSV file is generated
-3. Check that all products are included
-4. Verify calculated values are correct
-
-### 4. Data Persistence Testing
-
-#### Save/Load Test
-1. Add products, suppliers, and users
-2. Exit the application
-3. Restart and verify data is loaded
-4. Check that all information is preserved
-
-#### File Management Test
-1. Navigate to Data Management (admin only)
-2. View data file information
-3. Test save all data functionality
-4. Verify file sizes and existence
-
-### 5. User Management Testing
-
-#### Create User Test
-1. Login as admin
-2. Navigate to User Management → Create New User
-3. Create a staff account
-4. Verify user is saved and can be viewed
-
-#### Password Change Test
-1. Login as any user
-2. Navigate to User Management → Change Password
-3. Enter current password correctly
-4. Set new password
-5. Logout and verify new password works
-
-### 6. Integration Testing
-
-#### Complete Workflow Test
-1. Login as admin
-2. Add suppliers
-3. Add products with supplier assignments
-4. Create orders and process sales
-5. Generate and export reports
-6. Verify all data persists between sessions
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-#### Compilation Errors
-- Ensure Java 8+ is installed
-- Check all source files are in correct package structure
-- Verify import statements are correct
-
-#### Runtime Errors
-- Check file permissions for data files
-- Ensure exports directory can be created
-- Verify input validation is working correctly
-
-#### Data Persistence Issues
-- Check if data files are corrupted
-- Verify file paths are correct
-- Ensure sufficient disk space
-
-### Debug Mode
-- Check console output for detailed error messages
-- Verify data file existence and permissions
-- Test individual components in isolation
-
-## 📝 Code Quality Features
-
-### Input Validation
-- Comprehensive error checking
-- User-friendly error messages
-- Input sanitization
-
-### Error Handling
-- Graceful degradation
-- Informative error messages
-- Data integrity protection
-
-### Code Organization
-- Modular design
-- Clear separation of concerns
-- Consistent naming conventions
-
-## 🔮 Future Enhancements
-
-### Potential Phase 9 Features
-- Database integration
-- Web-based interface
-- Advanced analytics
-- Barcode scanning
-- Email notifications
-- Multi-warehouse support
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
----
-
-**Note**: This system is designed for educational and demonstration purposes. For production use, consider implementing additional security measures such as password hashing, database encryption, and audit logging.
+This project is licensed under the MIT License.

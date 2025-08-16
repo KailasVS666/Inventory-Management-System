@@ -19,14 +19,14 @@ public class SuppliersScreen {
     
     private final InventoryManagementApp app;
     private final VBox root;
-    private final TableView<Supplier> suppliersTable;
-    private final ObservableList<Supplier> suppliersData;
+    private TableView<Supplier> suppliersTable;
+    private ObservableList<Supplier> suppliersData;
     private final SupplierManager supplierManager;
     private final UserManager userManager;
     
     // Form fields
-    private final TextField nameField;
-    private final TextField contactInfoField;
+    private TextField nameField;
+    private TextField contactInfoField;
     
     public SuppliersScreen(InventoryManagementApp app) {
         this.app = app;

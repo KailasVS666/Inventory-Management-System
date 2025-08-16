@@ -19,17 +19,17 @@ public class ProductsScreen {
     
     private final InventoryManagementApp app;
     private final VBox root;
-    private final TableView<Product> productsTable;
-    private final ObservableList<Product> productsData;
+    private TableView<Product> productsTable;
+    private ObservableList<Product> productsData;
     private final InventoryManager inventoryManager;
     private final UserManager userManager;
     
     // Form fields
-    private final TextField nameField;
-    private final TextField priceField;
-    private final TextField quantityField;
-    private final TextField reorderLevelField;
-    private final TextField supplierIdField;
+    private TextField nameField;
+    private TextField priceField;
+    private TextField quantityField;
+    private TextField reorderLevelField;
+    private TextField supplierIdField;
     
     public ProductsScreen(InventoryManagementApp app) {
         this.app = app;

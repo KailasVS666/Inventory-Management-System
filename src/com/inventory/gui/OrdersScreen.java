@@ -18,7 +18,7 @@ public class OrdersScreen {
     
     private final InventoryManagementApp app;
     private final VBox root;
-    private final TableView<Order> ordersTable;
+    private TableView<Order> ordersTable;
     private final ObservableList<Order> ordersData;
     private final OrderManager orderManager;
     

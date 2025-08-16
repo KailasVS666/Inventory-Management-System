@@ -3,16 +3,25 @@ package com.inventory.gui;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ScrollPane;
+
 import com.inventory.managers.ReportManager;
 
 public class ReportsScreen {
     
     private final InventoryManagementApp app;
-    private final VBox root;
+    private VBox root;
     private final ReportManager reportManager;
     
     public ReportsScreen(InventoryManagementApp app) {
@@ -36,6 +45,20 @@ public class ReportsScreen {
         
         // Create back button
         createBackButton();
+        
+        // Create scrollable container
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setContent(root);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setPrefViewportHeight(600);
+        scrollPane.setPrefViewportWidth(800);
+        
+        // Set the scroll pane as the root
+        VBox scrollRoot = new VBox();
+        scrollRoot.getChildren().add(scrollPane);
+        this.root = scrollRoot;
     }
     
     private void createHeader() {
@@ -169,50 +192,124 @@ public class ReportsScreen {
     // Report generation methods
     private void generateLowStockReport() {
         try {
-            // TODO: Call reportManager.viewLowStockProducts()
-            // For now, show a placeholder message
-            InventoryManagementApp.showInfo("Low Stock Report", "Report Generated", "Low stock report will be displayed when integration is complete.");
+            var lowStockProducts = reportManager.getLowStockProducts();
+            if (lowStockProducts.isEmpty()) {
+                InventoryManagementApp.showInfo("Low Stock Report", "No Low Stock Products", "All products have sufficient stock levels.");
+                return;
+            }
+            // TableView for products
+            TableView<com.inventory.models.Product> table = new TableView<>();
+            TableColumn<com.inventory.models.Product, String> idCol = new TableColumn<>("ID");
+            idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
+            TableColumn<com.inventory.models.Product, String> nameCol = new TableColumn<>("Name");
+            nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+            TableColumn<com.inventory.models.Product, Integer> qtyCol = new TableColumn<>("Quantity");
+            qtyCol.setCellValueFactory(new PropertyValueFactory<>("quantity"));
+            TableColumn<com.inventory.models.Product, Integer> reorderCol = new TableColumn<>("Reorder Level");
+            reorderCol.setCellValueFactory(new PropertyValueFactory<>("reorderLevel"));
+            table.getColumns().addAll(idCol, nameCol, qtyCol, reorderCol);
+            table.getItems().addAll(lowStockProducts);
+            table.setPrefHeight(300);
+            // Summary
+            String summary = "Total Low Stock Products: " + lowStockProducts.size();
+            // Dialog
+            Dialog<Void> dialog = new Dialog<>();
+            dialog.setTitle("Low Stock Report");
+            dialog.getDialogPane().setMinWidth(600);
+            VBox content = new VBox(10, table, new Label(summary));
+            content.setPadding(new Insets(20));
+            dialog.getDialogPane().setContent(content);
+            dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+            dialog.showAndWait();
         } catch (Exception e) {
             InventoryManagementApp.showError("Error", "Failed to generate low stock report", e.getMessage());
         }
     }
-    
+
     private void generateInventoryValueReport() {
         try {
-            // TODO: Call reportManager.viewTotalInventoryValue()
-            // For now, show a placeholder message
-            InventoryManagementApp.showInfo("Inventory Value Report", "Report Generated", "Inventory value report will be displayed when integration is complete.");
+            var products = reportManager.getAllProducts();
+            if (products.isEmpty()) {
+                InventoryManagementApp.showInfo("Inventory Value Report", "No Products", "Inventory is empty.");
+                return;
+            }
+            TableView<com.inventory.models.Product> table = new TableView<>();
+            TableColumn<com.inventory.models.Product, String> idCol = new TableColumn<>("ID");
+            idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
+            TableColumn<com.inventory.models.Product, String> nameCol = new TableColumn<>("Name");
+            nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+            TableColumn<com.inventory.models.Product, Double> priceCol = new TableColumn<>("Price");
+            priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
+            TableColumn<com.inventory.models.Product, Integer> qtyCol = new TableColumn<>("Quantity");
+            qtyCol.setCellValueFactory(new PropertyValueFactory<>("quantity"));
+            TableColumn<com.inventory.models.Product, Double> valueCol = new TableColumn<>("Item Value");
+            valueCol.setCellValueFactory(cellData -> new javafx.beans.property.SimpleDoubleProperty(cellData.getValue().getPrice() * cellData.getValue().getQuantity()).asObject());
+            table.getColumns().addAll(idCol, nameCol, priceCol, qtyCol, valueCol);
+            table.getItems().addAll(products);
+            table.setPrefHeight(300);
+            // Summary
+            String summary = reportManager.getInventoryValueSummary();
+            Dialog<Void> dialog = new Dialog<>();
+            dialog.setTitle("Inventory Value Report");
+            dialog.getDialogPane().setMinWidth(700);
+            VBox content = new VBox(10, table, new Label(summary));
+            content.setPadding(new Insets(20));
+            dialog.getDialogPane().setContent(content);
+            dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+            dialog.showAndWait();
         } catch (Exception e) {
             InventoryManagementApp.showError("Error", "Failed to generate inventory value report", e.getMessage());
         }
     }
-    
+
     private void generateSalesSummaryReport() {
         try {
-            // TODO: Call reportManager.viewSalesSummary()
-            // For now, show a placeholder message
-            InventoryManagementApp.showInfo("Sales Summary Report", "Report Generated", "Sales summary report will be displayed when integration is complete.");
+            var orders = reportManager.getAllOrders();
+            if (orders.isEmpty()) {
+                InventoryManagementApp.showInfo("Sales Summary Report", "No Sales", "No sales found.");
+                return;
+            }
+            TableView<com.inventory.models.Order> table = new TableView<>();
+            TableColumn<com.inventory.models.Order, String> idCol = new TableColumn<>("Order ID");
+            idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
+            TableColumn<com.inventory.models.Order, String> productIdCol = new TableColumn<>("Product ID");
+            productIdCol.setCellValueFactory(new PropertyValueFactory<>("productId"));
+            TableColumn<com.inventory.models.Order, Integer> qtyCol = new TableColumn<>("Quantity");
+            qtyCol.setCellValueFactory(new PropertyValueFactory<>("quantity"));
+            TableColumn<com.inventory.models.Order, Double> totalCol = new TableColumn<>("Total Amount");
+            totalCol.setCellValueFactory(new PropertyValueFactory<>("totalAmount"));
+            table.getColumns().addAll(idCol, productIdCol, qtyCol, totalCol);
+            table.getItems().addAll(orders);
+            table.setPrefHeight(300);
+            // Summary
+            String summary = reportManager.getSalesSummaryText();
+            Dialog<Void> dialog = new Dialog<>();
+            dialog.setTitle("Sales Summary Report");
+            dialog.getDialogPane().setMinWidth(700);
+            VBox content = new VBox(10, table, new Label(summary));
+            content.setPadding(new Insets(20));
+            dialog.getDialogPane().setContent(content);
+            dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+            dialog.showAndWait();
         } catch (Exception e) {
             InventoryManagementApp.showError("Error", "Failed to generate sales summary report", e.getMessage());
         }
     }
-    
+
     // Export methods
     private void exportLowStockReport() {
         try {
-            // TODO: Call reportManager.exportLowStockReport()
-            // For now, show a placeholder message
-            InventoryManagementApp.showInfo("Export Low Stock Report", "Export Successful", "Low stock report will be exported to CSV when integration is complete.");
+            reportManager.exportLowStockReport();
+            InventoryManagementApp.showInfo("Export Low Stock Report", "Export Successful", "Low stock report exported to the exports folder.");
         } catch (Exception e) {
             InventoryManagementApp.showError("Error", "Failed to export low stock report", e.getMessage());
         }
     }
-    
+
     private void exportInventoryValueReport() {
         try {
-            // TODO: Call reportManager.exportInventoryValueReport()
-            // For now, show a placeholder message
-            InventoryManagementApp.showInfo("Export Inventory Value Report", "Export Successful", "Inventory value report will be exported to CSV when integration is complete.");
+            reportManager.exportInventoryValueReport();
+            InventoryManagementApp.showInfo("Export Inventory Value Report", "Export Successful", "Inventory value report exported to the exports folder.");
         } catch (Exception e) {
             InventoryManagementApp.showError("Error", "Failed to export inventory value report", e.getMessage());
         }

@@ -14,11 +14,12 @@ import com.inventory.models.Supplier;
 import com.inventory.managers.SupplierManager;
 import com.inventory.managers.UserManager;
 import java.util.List;
+import javafx.scene.control.ScrollPane;
 
 public class SuppliersScreen {
     
     private final InventoryManagementApp app;
-    private final VBox root;
+    private VBox root;
     private TableView<Supplier> suppliersTable;
     private ObservableList<Supplier> suppliersData;
     private final SupplierManager supplierManager;
@@ -57,6 +58,20 @@ public class SuppliersScreen {
         
         // Create back button
         createBackButton();
+        
+        // Create scrollable container
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setContent(root);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setPrefViewportHeight(600);
+        scrollPane.setPrefViewportWidth(800);
+        
+        // Set the scroll pane as the root
+        VBox scrollRoot = new VBox();
+        scrollRoot.getChildren().add(scrollPane);
+        this.root = scrollRoot;
     }
     
     private void createHeader() {

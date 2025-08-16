@@ -16,11 +16,12 @@ import com.inventory.managers.UserManager;
 import java.util.List;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.control.ScrollPane;
 
 public class ProductsScreen {
     
     private final InventoryManagementApp app;
-    private final VBox root;
+    private VBox root;
     private TableView<Product> productsTable;
     private ObservableList<Product> productsData;
     private final InventoryManager inventoryManager;
@@ -65,6 +66,20 @@ public class ProductsScreen {
         
         // Create back button
         createBackButton();
+        
+        // Create scrollable container
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setContent(root);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setPrefViewportHeight(600);
+        scrollPane.setPrefViewportWidth(800);
+        
+        // Set the scroll pane as the root
+        VBox scrollRoot = new VBox();
+        scrollRoot.getChildren().add(scrollPane);
+        this.root = scrollRoot;
     }
     
     private void createHeader() {
@@ -165,7 +180,7 @@ public class ProductsScreen {
         // Create table
         productsTable = new TableView<>();
         productsTable.setItems(productsData);
-        productsTable.setPrefHeight(400);
+        productsTable.setPrefHeight(250);
         productsTable.setPlaceholder(new Label("No products found"));
         
         // Create columns

@@ -310,4 +310,64 @@ public class ReportManager {
             }
         }
     }
+
+    // --- GUI Data Methods ---
+    public List<Product> getLowStockProducts() {
+        List<Product> products = getProductsFromInventory();
+        List<Product> lowStockProducts = new ArrayList<>();
+        for (Product product : products) {
+            if (product.getQuantity() <= product.getReorderLevel()) {
+                lowStockProducts.add(product);
+            }
+        }
+        return lowStockProducts;
+    }
+
+    public List<Product> getAllProducts() {
+        return getProductsFromInventory();
+    }
+
+    public List<Order> getAllOrders() {
+        return getOrdersFromOrderManager();
+    }
+
+    public String getInventoryValueSummary() {
+        List<Product> products = getProductsFromInventory();
+        if (products.isEmpty()) return "Inventory is empty.";
+        double totalValue = 0.0;
+        int totalItems = 0;
+        for (Product product : products) {
+            totalValue += product.getPrice() * product.getQuantity();
+            totalItems += product.getQuantity();
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("Total Products: ").append(products.size()).append("\n");
+        sb.append("Total Items: ").append(totalItems).append("\n");
+        sb.append(String.format("Total Inventory Value: $%.2f\n", totalValue));
+        if (products.size() > 0 && totalItems > 0) {
+            double avgItemValue = totalValue / totalItems;
+            double avgProductValue = totalValue / products.size();
+            sb.append(String.format("Average Item Value: $%.2f\n", avgItemValue));
+            sb.append(String.format("Average Product Value: $%.2f\n", avgProductValue));
+        }
+        return sb.toString();
+    }
+
+    public String getSalesSummaryText() {
+        List<Order> orders = getOrdersFromOrderManager();
+        if (orders.isEmpty()) return "No sales found.";
+        double totalSales = 0.0;
+        int totalOrders = orders.size();
+        for (Order order : orders) {
+            totalSales += order.getTotalAmount();
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("Total Orders: ").append(totalOrders).append("\n");
+        sb.append(String.format("Total Sales Value: $%.2f\n", totalSales));
+        if (totalOrders > 0) {
+            double avgOrderValue = totalSales / totalOrders;
+            sb.append(String.format("Average Order Value: $%.2f\n", avgOrderValue));
+        }
+        return sb.toString();
+    }
 }

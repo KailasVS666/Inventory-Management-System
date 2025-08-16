@@ -103,6 +103,10 @@ public class InventoryManagementApp extends Application {
         primaryStage.centerOnScreen();
     }
     
+    public Stage getPrimaryStage() {
+        return primaryStage;
+    }
+    
     public void showReportsScreen() {
         ReportsScreen reportsScreen = new ReportsScreen(this);
         Scene scene = new Scene(reportsScreen.getRoot());

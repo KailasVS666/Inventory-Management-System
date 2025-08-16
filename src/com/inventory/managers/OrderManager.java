@@ -194,6 +194,12 @@ public class OrderManager {
         return new ArrayList<>(orders);
     }
     
+    // GUI-friendly method to add order
+    public void addOrder(Order order) {
+        orders.add(order);
+        saveOrders(); // Auto-save when order is added
+    }
+    
     // Data Persistence Methods
     private void loadOrders() {
         List<Order> loadedOrders = DataStore.loadData(DataStore.ORDERS_FILE);

@@ -47,9 +47,6 @@ public class InventoryManagementApp extends Application {
             System.out.println("   Light theme path: " + LIGHT_THEME_PATH);
             System.out.println("   Dark theme path: " + DARK_THEME_PATH);
             
-            // TEMPORARILY DISABLE CSS TO DEBUG BLANK SCREEN
-            System.out.println("⚠ CSS temporarily disabled for debugging");
-            /*
             if ("dark".equals(currentTheme)) {
                 var darkThemeResource = getClass().getResource(DARK_THEME_PATH);
                 System.out.println("   Dark theme resource: " + darkThemeResource);
@@ -69,7 +66,6 @@ public class InventoryManagementApp extends Application {
                     System.out.println("⚠ Light theme CSS not found, using default styling");
                 }
             }
-            */
         } catch (Exception e) {
             System.out.println("⚠ Theme application failed: " + e.getMessage() + ", using default styling");
             e.printStackTrace();

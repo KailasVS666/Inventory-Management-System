@@ -7,21 +7,18 @@
     -fx-background-color: #ffffff;
 }
 
-.vbox {
-    -fx-background-color: #ffffff;
-}
-
-.hbox {
-    -fx-background-color: #ffffff;
-}
+/* Remove overly specific container styling that might cause blank screens */
+/* .vbox, .hbox, .grid-pane styling removed to prevent conflicts */
 
 .text {
     -fx-fill: #2c3e50;
+    -fx-font-size: 14px;
 }
 
 .label {
     -fx-text-fill: #2c3e50;
     -fx-font-weight: normal;
+    -fx-font-size: 14px;
 }
 
 .button {
@@ -31,6 +28,7 @@
     -fx-padding: 8 16 8 16;
     -fx-background-radius: 5;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 2, 0, 0, 1);
+    -fx-font-size: 14px;
 }
 
 .button:hover {
@@ -42,8 +40,9 @@
     -fx-background-color: #95a5a6;
     -fx-text-fill: white;
     -fx-font-weight: bold;
-    -fx-padding: 8 16 8 16;
+    -fx-padding: 4 12 4 12;
     -fx-background-radius: 5;
+    -fx-font-size: 14px;
 }
 
 .toggle-button:selected {
@@ -56,9 +55,9 @@
 }
 
 .scroll-pane {
-    -fx-background-color: #ffffff;
+    -fx-background-color: transparent;
 }
 
 .grid-pane {
-    -fx-background-color: #ffffff;
+    -fx-background-color: transparent;
 }

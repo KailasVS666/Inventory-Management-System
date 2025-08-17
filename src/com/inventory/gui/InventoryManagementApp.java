@@ -24,6 +24,58 @@ public class InventoryManagementApp extends Application {
     private LoginScreen loginScreen;
     private DashboardScreen dashboardScreen;
     
+    private static String currentTheme = "light"; // "light" or "dark"
+    private static final String LIGHT_THEME_PATH = "light-theme.css";
+    private static final String DARK_THEME_PATH = "dark-theme.css";
+
+    public static String getCurrentTheme() {
+        return currentTheme;
+    }
+
+    public static void setTheme(String theme) {
+        if (!theme.equals(currentTheme)) {
+            currentTheme = theme;
+        }
+    }
+
+    private void applyTheme(Scene scene) {
+        try {
+            scene.getStylesheets().clear();
+            
+            // Debug: Show what we're looking for
+            System.out.println("🔍 Looking for CSS files:");
+            System.out.println("   Light theme path: " + LIGHT_THEME_PATH);
+            System.out.println("   Dark theme path: " + DARK_THEME_PATH);
+            
+            // TEMPORARILY DISABLE CSS TO DEBUG BLANK SCREEN
+            System.out.println("⚠ CSS temporarily disabled for debugging");
+            /*
+            if ("dark".equals(currentTheme)) {
+                var darkThemeResource = getClass().getResource(DARK_THEME_PATH);
+                System.out.println("   Dark theme resource: " + darkThemeResource);
+                if (darkThemeResource != null) {
+                    scene.getStylesheets().add(darkThemeResource.toExternalForm());
+                    System.out.println("✓ Dark theme applied successfully");
+                } else {
+                    System.out.println("⚠ Dark theme CSS not found, using default styling");
+                }
+            } else {
+                var lightThemeResource = getClass().getResource(LIGHT_THEME_PATH);
+                System.out.println("   Light theme resource: " + lightThemeResource);
+                if (lightThemeResource != null) {
+                    scene.getStylesheets().add(lightThemeResource.toExternalForm());
+                    System.out.println("✓ Light theme applied successfully");
+                } else {
+                    System.out.println("⚠ Light theme CSS not found, using default styling");
+                }
+            }
+            */
+        } catch (Exception e) {
+            System.out.println("⚠ Theme application failed: " + e.getMessage() + ", using default styling");
+            e.printStackTrace();
+        }
+    }
+    
     @Override
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
@@ -67,8 +119,8 @@ public class InventoryManagementApp extends Application {
     public void showLoginScreen() {
         // Create new instance each time to avoid VBox reuse error
         loginScreen = new LoginScreen(this);
-        
         Scene scene = new Scene(loginScreen.getRoot());
+        applyTheme(scene);
         primaryStage.setScene(scene);
         primaryStage.centerOnScreen();
     }
@@ -76,8 +128,8 @@ public class InventoryManagementApp extends Application {
     public void showDashboard() {
         // Create new instance each time to avoid VBox reuse error
         dashboardScreen = new DashboardScreen(this);
-        
         Scene scene = new Scene(dashboardScreen.getRoot());
+        applyTheme(scene);
         primaryStage.setScene(scene);
         primaryStage.centerOnScreen();
     }
@@ -85,6 +137,7 @@ public class InventoryManagementApp extends Application {
     public void showProductsScreen() {
         ProductsScreen productsScreen = new ProductsScreen(this);
         Scene scene = new Scene(productsScreen.getRoot());
+        applyTheme(scene);
         primaryStage.setScene(scene);
         primaryStage.centerOnScreen();
     }
@@ -92,6 +145,7 @@ public class InventoryManagementApp extends Application {
     public void showSuppliersScreen() {
         SuppliersScreen suppliersScreen = new SuppliersScreen(this);
         Scene scene = new Scene(suppliersScreen.getRoot());
+        applyTheme(scene);
         primaryStage.setScene(scene);
         primaryStage.centerOnScreen();
     }
@@ -99,6 +153,7 @@ public class InventoryManagementApp extends Application {
     public void showOrdersScreen() {
         OrdersScreen ordersScreen = new OrdersScreen(this);
         Scene scene = new Scene(ordersScreen.getRoot());
+        applyTheme(scene);
         primaryStage.setScene(scene);
         primaryStage.centerOnScreen();
     }
@@ -110,6 +165,7 @@ public class InventoryManagementApp extends Application {
     public void showReportsScreen() {
         ReportsScreen reportsScreen = new ReportsScreen(this);
         Scene scene = new Scene(reportsScreen.getRoot());
+        applyTheme(scene);
         primaryStage.setScene(scene);
         primaryStage.centerOnScreen();
     }

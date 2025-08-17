@@ -2,8 +2,12 @@ package com.inventory.gui;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
@@ -14,6 +18,7 @@ public class DashboardScreen {
     private final InventoryManagementApp app;
     private final VBox root;
     private final UserManager userManager;
+    private ToggleButton themeToggle;
     
     public DashboardScreen(InventoryManagementApp app) {
         this.app = app;
@@ -21,9 +26,9 @@ public class DashboardScreen {
         
         // Create main container
         root = new VBox(20);
-        root.setAlignment(Pos.TOP_CENTER);
+        root.setAlignment(Pos.CENTER); // Change from TOP_CENTER to CENTER
         root.setPadding(new Insets(30));
-        root.setStyle("-fx-background-color: #f5f5f5;");
+        root.getStyleClass().add("dashboard-root"); // Use CSS class instead of inline style
         
         // Create header
         createHeader();
@@ -60,15 +65,35 @@ public class DashboardScreen {
         username.setStyle("-fx-fill: #3498db;");
         
         userInfo.getChildren().addAll(userLabel, username);
-        
-        header.getChildren().addAll(title, subtitle, userInfo);
+
+        // Theme toggle
+        themeToggle = new ToggleButton();
+        themeToggle.setText(InventoryManagementApp.getCurrentTheme().equals("dark") ? "🌙 Dark" : "☀ Light");
+        themeToggle.setSelected(InventoryManagementApp.getCurrentTheme().equals("dark"));
+        themeToggle.setOnAction(e -> {
+            if (themeToggle.isSelected()) {
+                InventoryManagementApp.setTheme("dark");
+                themeToggle.setText("🌙 Dark");
+            } else {
+                InventoryManagementApp.setTheme("light");
+                themeToggle.setText("☀ Light");
+            }
+            app.showDashboard(); // Refresh dashboard to apply theme
+        });
+        themeToggle.setStyle("-fx-font-size: 14; -fx-background-radius: 5; -fx-padding: 4 12 4 12;");
+
+        HBox headerRow = new HBox(20, title, themeToggle);
+        headerRow.setAlignment(Pos.CENTER);
+
+        header.getChildren().addAll(headerRow, subtitle, userInfo);
         root.getChildren().add(header);
     }
     
     private void createNavigationButtons() {
         VBox buttonContainer = new VBox(20);
         buttonContainer.setAlignment(Pos.CENTER);
-        buttonContainer.setMaxWidth(600);
+        buttonContainer.setMaxWidth(Double.MAX_VALUE); // Allow full expansion
+        buttonContainer.setPrefWidth(800); // Set preferred width for better layout
         
         // Create button grid
         GridPane buttonGrid = new GridPane();
@@ -92,23 +117,15 @@ public class DashboardScreen {
         Button reportsBtn = createModuleButton("Reports & Analytics", "Generate reports, view analytics, and export data", "#9b59b6");
         reportsBtn.setOnAction(e -> showReportsScreen());
         
-        // User Management Button (Admin only)
-        Button usersBtn = createModuleButton("User Management", "Manage user accounts and permissions", "#34495e");
-        usersBtn.setOnAction(e -> showUsersScreen());
-        usersBtn.setVisible(userManager.getCurrentUser() != null && userManager.getCurrentUser().isAdmin());
-        
-        // Data Management Button (Admin only)
-        Button dataBtn = createModuleButton("Data Management", "Manage data files and system settings", "#95a5a6");
-        dataBtn.setOnAction(e -> showDataManagementScreen());
-        dataBtn.setVisible(userManager.getCurrentUser() != null && userManager.getCurrentUser().canAccessDataManagement());
-        
-        // Add buttons to grid
+        // Add buttons to grid - only add the visible ones
         buttonGrid.add(productsBtn, 0, 0);
         buttonGrid.add(suppliersBtn, 1, 0);
         buttonGrid.add(ordersBtn, 0, 1);
         buttonGrid.add(reportsBtn, 1, 1);
-        buttonGrid.add(usersBtn, 0, 2);
-        buttonGrid.add(dataBtn, 1, 2);
+        
+        // Note: usersBtn and dataBtn are admin-only and will be added dynamically when needed
+        // buttonGrid.add(usersBtn, 0, 2);
+        // buttonGrid.add(dataBtn, 1, 2);
         
         buttonContainer.getChildren().add(buttonGrid);
         root.getChildren().add(buttonContainer);

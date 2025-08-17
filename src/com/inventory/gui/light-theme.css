@@ -1,0 +1,64 @@
+.root {
+    -fx-background-color: #f8f9fa;
+    -fx-font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.dashboard-root {
+    -fx-background-color: #ffffff;
+}
+
+.vbox {
+    -fx-background-color: #ffffff;
+}
+
+.hbox {
+    -fx-background-color: #ffffff;
+}
+
+.text {
+    -fx-fill: #2c3e50;
+}
+
+.label {
+    -fx-text-fill: #2c3e50;
+    -fx-font-weight: normal;
+}
+
+.button {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 8 16 8 16;
+    -fx-background-radius: 5;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 2, 0, 0, 1);
+}
+
+.button:hover {
+    -fx-background-color: #2980b9;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 3, 0, 0, 2);
+}
+
+.toggle-button {
+    -fx-background-color: #95a5a6;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 8 16 8 16;
+    -fx-background-radius: 5;
+}
+
+.toggle-button:selected {
+    -fx-background-color: #34495e;
+}
+
+.table-view {
+    -fx-background-color: #ffffff;
+    -fx-table-cell-border-color: #e0e0e0;
+}
+
+.scroll-pane {
+    -fx-background-color: #ffffff;
+}
+
+.grid-pane {
+    -fx-background-color: #ffffff;
+}

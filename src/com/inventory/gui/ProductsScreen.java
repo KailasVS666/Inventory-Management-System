@@ -17,394 +17,357 @@ import java.util.List;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.paint.Color;
+import javafx.scene.effect.DropShadow;
 
 public class ProductsScreen {
     
     private final InventoryManagementApp app;
-    private VBox root;
-    private TableView<Product> productsTable;
-    private ObservableList<Product> productsData;
+    private final VBox root;
     private final InventoryManager inventoryManager;
-    private final UserManager userManager;
-    
-    // Form fields
-    private TextField nameField;
-    private TextField priceField;
-    private TextField quantityField;
-    private TextField reorderLevelField;
-    private TextField supplierIdField;
+    private final TableView<Product> productTable;
+    private final TextField searchField;
+    private final TextField nameField, priceField, quantityField, reorderLevelField, supplierIdField;
+    private final Label statusLabel;
     
     public ProductsScreen(InventoryManagementApp app) {
         this.app = app;
         this.inventoryManager = InventoryManagementApp.getInventoryManager();
-        this.userManager = InventoryManagementApp.getUserManager();
         
-        // Initialize data
-        productsData = FXCollections.observableArrayList();
-        loadProductsData();
+        // Create root layout with beautiful dark background
+        root = new VBox(25);
+        root.setPadding(new Insets(25));
+        root.setStyle("-fx-background-color: linear-gradient(to bottom, #1a1a2e 0%, #16213e 100%); -fx-background-radius: 0;");
         
-        // Create main container
-        root = new VBox(20);
-        root.setAlignment(Pos.TOP_CENTER);
-        root.setPadding(new Insets(20));
-        root.setStyle("-fx-background-color: #f5f5f5;");
+        // Initialize UI components
+        productTable = new TableView<>();
+        searchField = new TextField();
+        nameField = new TextField();
+        priceField = new TextField();
+        quantityField = new TextField();
+        reorderLevelField = new TextField();
+        supplierIdField = new TextField();
+        statusLabel = new Label();
         
-        // Create header
+        // Create UI sections
         createHeader();
-        
-        // Create search section
         createSearchSection();
-        
-        // Create table
-        createProductsTable();
-        
-        // Create form section
+        createTableSection();
         createFormSection();
+        createButtons();
         
-        // Create action buttons
-        createActionButtons();
+        // Apply initial theme
+        applyCurrentTheme();
         
-        // Create back button
-        createBackButton();
-        
-        // Create scrollable container
-        ScrollPane scrollPane = new ScrollPane();
-        scrollPane.setContent(root);
-        scrollPane.setFitToWidth(true);
-        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        scrollPane.setPrefViewportHeight(600);
-        scrollPane.setPrefViewportWidth(800);
-        
-        // Set the scroll pane as the root
-        VBox scrollRoot = new VBox();
-        scrollRoot.getChildren().add(scrollPane);
-        this.root = scrollRoot;
+        // Load products
+        loadProducts();
     }
     
     private void createHeader() {
-        VBox header = new VBox(10);
-        header.setAlignment(Pos.CENTER);
-        header.setPadding(new Insets(0, 0, 20, 0));
+        HBox header = new HBox(20);
+        header.setAlignment(Pos.CENTER_LEFT);
+        header.setPadding(new Insets(20, 30, 20, 30));
+        header.setStyle("-fx-background-color: linear-gradient(to right, #2c3e50 0%, #34495e 100%); -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 10, 0, 0, 0); -fx-border-color: #4a90e2; -fx-border-width: 2; -fx-border-radius: 15;");
         
-        Text title = new Text("Products Management");
-        title.setFont(Font.font("Arial", FontWeight.BOLD, 32));
-        title.setStyle("-fx-fill: #2c3e50;");
+        Text title = new Text("📦 Products Management");
+        title.setFont(Font.font("Segoe UI", FontWeight.BOLD, 32));
+        title.setStyle("-fx-fill: #ffffff; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 3, 0, 0, 0);");
         
-        Text subtitle = new Text("Manage inventory items, stock levels, and product information");
-        subtitle.setFont(Font.font("Arial", FontWeight.NORMAL, 16));
-        subtitle.setStyle("-fx-fill: #7f8c8d;");
+        Text subtitle = new Text("Manage your product inventory");
+        subtitle.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 18));
+        subtitle.setStyle("-fx-fill: #e8e8e8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 2, 0, 0, 0);");
         
-        header.getChildren().addAll(title, subtitle);
+        VBox titleBox = new VBox(8);
+        titleBox.getChildren().addAll(title, subtitle);
+        
+        header.getChildren().add(titleBox);
+        VBox.setMargin(header, new Insets(0, 0, 30, 0));
         root.getChildren().add(header);
     }
     
     private void createSearchSection() {
-        VBox searchContainer = new VBox(15);
-        searchContainer.setAlignment(Pos.CENTER);
-        searchContainer.setPadding(new Insets(20));
-        searchContainer.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 0);");
+        VBox searchContainer = new VBox(20);
+        searchContainer.setPadding(new Insets(25));
+        searchContainer.setStyle("-fx-background-color: linear-gradient(135deg, #34495e 0%, #2c3e50 100%); -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 15, 0, 0, 0); -fx-border-color: rgba(74, 144, 226, 0.3); -fx-border-width: 2; -fx-border-radius: 20;");
         
-        Text searchTitle = new Text("Search & Filter Products");
-        searchTitle.setFont(Font.font("Arial", FontWeight.BOLD, 18));
-        searchTitle.setStyle("-fx-fill: #2c3e50;");
+        Label searchTitle = new Label("🔍 Search Products");
+        searchTitle.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #ffffff; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 3, 0, 0, 0);");
         
-        HBox searchFields = new HBox(15);
-        searchFields.setAlignment(Pos.CENTER);
+        HBox searchBox = new HBox(15);
+        searchBox.setAlignment(Pos.CENTER_LEFT);
         
-        // Search by name
-        VBox nameSearch = new VBox(5);
-        Label nameLabel = new Label("Product Name:");
-        TextField nameSearchField = new TextField();
-        nameSearchField.setPromptText("Enter product name");
-        nameSearchField.setPrefWidth(200);
-        nameSearch.getChildren().addAll(nameLabel, nameSearchField);
+        Label searchLabel = new Label("Search:");
+        searchLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #ffffff; -fx-font-size: 16px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 2, 0, 0, 0);");
         
-        // Search by price range
-        VBox priceSearch = new VBox(5);
-        Label priceLabel = new Label("Price Range:");
-        HBox priceRange = new HBox(10);
-        TextField minPriceField = new TextField();
-        minPriceField.setPromptText("Min");
-        minPriceField.setPrefWidth(80);
-        TextField maxPriceField = new TextField();
-        maxPriceField.setPromptText("Max");
-        maxPriceField.setPrefWidth(80);
-        priceRange.getChildren().addAll(minPriceField, new Label("-"), maxPriceField);
-        priceSearch.getChildren().addAll(priceLabel, priceRange);
+        searchField.setPromptText("Enter product name or description");
+        searchField.setPrefWidth(300);
+        searchField.setPrefHeight(40);
+        searchField.setStyle("-fx-font-size: 14; -fx-background-radius: 20; -fx-background-color: rgba(255,255,255,0.9); -fx-border-radius: 20; -fx-border-color: #4a90e2; -fx-border-width: 2; -fx-text-fill: #2c3e50;");
         
-        // Search by supplier
-        VBox supplierSearch = new VBox(5);
-        Label supplierLabel = new Label("Supplier ID:");
-        TextField supplierSearchField = new TextField();
-        supplierSearchField.setPromptText("Enter supplier ID");
-        supplierSearchField.setPrefWidth(150);
-        supplierSearch.getChildren().addAll(supplierLabel, supplierSearchField);
-        
-        // Search button
         Button searchBtn = new Button("🔍 Search");
-        searchBtn.setPrefSize(100, 35);
-        searchBtn.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
-        searchBtn.setOnAction(e -> performSearch(nameSearchField.getText(), minPriceField.getText(), maxPriceField.getText(), supplierSearchField.getText()));
+        searchBtn.setStyle("-fx-background-color: rgba(74, 144, 226, 0.8); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-border-color: #4a90e2; -fx-border-width: 2; -fx-border-radius: 20; -fx-padding: 12 24; -fx-font-size: 14px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 0);");
         
-        // Clear search button
-        Button clearBtn = new Button("🔄 Clear");
-        clearBtn.setPrefSize(100, 35);
-        clearBtn.setStyle("-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
-        clearBtn.setOnAction(e -> {
-            nameSearchField.clear();
-            minPriceField.clear();
-            maxPriceField.clear();
-            supplierSearchField.clear();
-            loadProductsData();
+        Button clearBtn = new Button("🧹 Clear");
+        clearBtn.setStyle("-fx-background-color: rgba(52, 73, 94, 0.8); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-border-color: #34495e; -fx-border-width: 2; -fx-border-radius: 20; -fx-padding: 12 24; -fx-font-size: 14px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 0);");
+        
+        // Hover effects for buttons
+        searchBtn.setOnMouseEntered(e -> searchBtn.setStyle("-fx-background-color: rgba(74, 144, 226, 1.0); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-border-color: #4a90e2; -fx-border-width: 3; -fx-border-radius: 20; -fx-padding: 12 24; -fx-font-size: 14px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 8, 0, 0, 0);"));
+        searchBtn.setOnMouseExited(e -> searchBtn.setStyle("-fx-background-color: rgba(74, 144, 226, 0.8); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-border-color: #4a90e2; -fx-border-width: 2; -fx-border-radius: 20; -fx-padding: 12 24; -fx-font-size: 14px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 0);"));
+        
+        clearBtn.setOnMouseEntered(e -> clearBtn.setStyle("-fx-background-color: rgba(52, 73, 94, 1.0); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-border-color: #34495e; -fx-border-width: 3; -fx-border-radius: 20; -fx-padding: 12 24; -fx-font-size: 14px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 8, 0, 0, 0);"));
+        clearBtn.setOnMouseExited(e -> clearBtn.setStyle("-fx-background-color: rgba(52, 73, 94, 0.8); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-border-color: #34495e; -fx-border-width: 2; -fx-border-radius: 20; -fx-padding: 12 24; -fx-font-size: 14px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 0);"));
+        
+        searchBox.getChildren().addAll(searchLabel, searchField, searchBtn, clearBtn);
+        
+        searchContainer.getChildren().addAll(searchTitle, searchBox);
+        root.getChildren().add(searchContainer);
+        
+        // Search functionality
+        searchBtn.setOnAction(e -> {
+            String searchTerm = searchField.getText().toLowerCase();
+            if (searchTerm.isEmpty()) {
+                loadProducts();
+            } else {
+                // Filter products based on search term
+                List<Product> filteredProducts = inventoryManager.getProducts().stream()
+                    .filter(p -> p.getName().toLowerCase().contains(searchTerm) || 
+                                p.getId().toLowerCase().contains(searchTerm))
+                    .collect(java.util.stream.Collectors.toList());
+                
+                productTable.getItems().clear();
+                productTable.getItems().addAll(filteredProducts);
+            }
         });
         
-        HBox searchButtons = new HBox(10);
-        searchButtons.setAlignment(Pos.CENTER);
-        searchButtons.getChildren().addAll(searchBtn, clearBtn);
-        
-        searchContainer.getChildren().addAll(searchTitle, searchFields, searchButtons);
-        root.getChildren().add(searchContainer);
+        clearBtn.setOnAction(e -> {
+            searchField.clear();
+            loadProducts();
+        });
     }
     
-    private void createProductsTable() {
-        VBox tableContainer = new VBox(15);
-        tableContainer.setAlignment(Pos.CENTER);
-        tableContainer.setPadding(new Insets(20));
-        tableContainer.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 0);");
+    private void createTableSection() {
+        VBox tableContainer = new VBox(20);
+        tableContainer.setPadding(new Insets(25));
+        tableContainer.setStyle("-fx-background-color: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 15, 0, 0, 0); -fx-border-color: rgba(74, 144, 226, 0.3); -fx-border-width: 2; -fx-border-radius: 20;");
         
-        Text tableTitle = new Text("Products Table");
-        tableTitle.setFont(Font.font("Arial", FontWeight.BOLD, 18));
-        tableTitle.setStyle("-fx-fill: #2c3e50;");
+        Label tableTitle = new Label("📋 Product List");
+        tableTitle.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #ffffff; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 3, 0, 0, 0);");
         
-        // Create table
-        productsTable = new TableView<>();
-        productsTable.setItems(productsData);
-        productsTable.setPrefHeight(250);
-        productsTable.setPlaceholder(new Label("No products found"));
+        // Style the table
+        productTable.setStyle("-fx-background-color: rgba(255,255,255,0.95); -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 10, 0, 0, 0);");
+        productTable.setPrefHeight(350);
         
-        // Create columns
-        TableColumn<Product, String> idCol = new TableColumn<>("ID");
+        // Create table columns with better styling
+        TableColumn<Product, String> idCol = new TableColumn<>("🆔 ID");
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
-        idCol.setPrefWidth(80);
+        idCol.setPrefWidth(100);
+        idCol.setStyle("-fx-background-color: linear-gradient(to bottom, #2c3e50 0%, #34495e 100%); -fx-text-fill: white;");
         
-        TableColumn<Product, String> nameCol = new TableColumn<>("Name");
+        TableColumn<Product, String> nameCol = new TableColumn<>("📝 Name");
         nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
         nameCol.setPrefWidth(200);
+        nameCol.setStyle("-fx-background-color: linear-gradient(to bottom, #2c3e50 0%, #34495e 100%); -fx-text-fill: white;");
         
-        TableColumn<Product, Double> priceCol = new TableColumn<>("Price");
+        TableColumn<Product, Double> priceCol = new TableColumn<>("💰 Price");
         priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
-        priceCol.setPrefWidth(100);
-        priceCol.setCellFactory(col -> new TableCell<Product, Double>() {
-            @Override
-            protected void updateItem(Double price, boolean empty) {
-                super.updateItem(price, empty);
-                if (empty || price == null) {
-                    setText(null);
-                } else {
-                    setText(String.format("$%.2f", price));
-                }
-            }
-        });
+        priceCol.setPrefWidth(120);
+        priceCol.setStyle("-fx-background-color: linear-gradient(to bottom, #2c3e50 0%, #34495e 100%); -fx-text-fill: white;");
         
-        TableColumn<Product, Integer> quantityCol = new TableColumn<>("Quantity");
+        TableColumn<Product, Integer> quantityCol = new TableColumn<>("📦 Quantity");
         quantityCol.setCellValueFactory(new PropertyValueFactory<>("quantity"));
-        quantityCol.setPrefWidth(100);
-        quantityCol.setCellFactory(col -> new TableCell<Product, Integer>() {
-            @Override
-            protected void updateItem(Integer quantity, boolean empty) {
-                super.updateItem(quantity, empty);
-                if (empty || quantity == null) {
-                    setText(null);
-                } else {
-                    setText(quantity.toString());
-                    // Highlight low stock
-                    if (quantity <= 5) {
-                        setStyle("-fx-background-color: #ffebee; -fx-text-fill: #d32f2f; -fx-font-weight: bold;");
-                    } else {
-                        setStyle("");
-                    }
-                }
-            }
-        });
+        quantityCol.setPrefWidth(120);
+        quantityCol.setStyle("-fx-background-color: linear-gradient(to bottom, #2c3e50 0%, #34495e 100%); -fx-text-fill: white;");
         
-        TableColumn<Product, Integer> reorderCol = new TableColumn<>("Reorder Level");
-        reorderCol.setCellValueFactory(new PropertyValueFactory<>("reorderLevel"));
-        reorderCol.setPrefWidth(120);
+        TableColumn<Product, Integer> reorderLevelCol = new TableColumn<>("⚠️ Reorder Level");
+        reorderLevelCol.setCellValueFactory(new PropertyValueFactory<>("reorderLevel"));
+        reorderLevelCol.setPrefWidth(140);
+        reorderLevelCol.setStyle("-fx-background-color: linear-gradient(to bottom, #2c3e50 0%, #34495e 100%); -fx-text-fill: white;");
         
-        TableColumn<Product, String> supplierCol = new TableColumn<>("Supplier ID");
-        supplierCol.setCellValueFactory(new PropertyValueFactory<>("supplierId"));
-        supplierCol.setPrefWidth(120);
-        supplierCol.setCellFactory(col -> new TableCell<Product, String>() {
-            @Override
-            protected void updateItem(String supplierId, boolean empty) {
-                super.updateItem(supplierId, empty);
-                if (empty || supplierId == null || supplierId.isEmpty()) {
-                    setText("N/A");
-                } else {
-                    setText(supplierId);
-                }
-            }
-        });
+        TableColumn<Product, String> supplierIdCol = new TableColumn<>("🏢 Supplier ID");
+        supplierIdCol.setCellValueFactory(new PropertyValueFactory<>("supplierId"));
+        supplierIdCol.setPrefWidth(140);
+        supplierIdCol.setStyle("-fx-background-color: linear-gradient(to bottom, #2c3e50 0%, #34495e 100%); -fx-text-fill: white;");
         
-        // Add columns to table
-        productsTable.getColumns().addAll(idCol, nameCol, priceCol, quantityCol, reorderCol, supplierCol);
+        productTable.getColumns().addAll(idCol, nameCol, priceCol, quantityCol, reorderLevelCol, supplierIdCol);
         
-        // Handle row selection
-        productsTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+        // Row selection with enhanced styling
+        productTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
-                populateForm(newSelection);
+                loadProductToForm(newSelection);
+                // Highlight selected row
+                productTable.setStyle("-fx-background-color: rgba(255,255,255,0.98); -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 15, 0, 0, 0);");
             }
         });
         
-        tableContainer.getChildren().addAll(tableTitle, productsTable);
+        tableContainer.getChildren().addAll(tableTitle, productTable);
         root.getChildren().add(tableContainer);
     }
     
     private void createFormSection() {
-        VBox formContainer = new VBox(15);
-        formContainer.setAlignment(Pos.CENTER);
-        formContainer.setPadding(new Insets(20));
-        formContainer.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 0);");
+        VBox formContainer = new VBox(20);
+        formContainer.setPadding(new Insets(25));
+        formContainer.setStyle("-fx-background-color: linear-gradient(135deg, #34495e 0%, #2c3e50 100%); -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 15, 0, 0, 0); -fx-border-color: rgba(74, 144, 226, 0.3); -fx-border-width: 2; -fx-border-radius: 20;");
         
-        Text formTitle = new Text("Add/Edit Product");
-        formTitle.setFont(Font.font("Arial", FontWeight.BOLD, 18));
-        formTitle.setStyle("-fx-fill: #2c3e50;");
+        Label formTitle = new Label("✏️ Add/Edit Product");
+        formTitle.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #ffffff; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 3, 0, 0, 0);");
         
-        // Create form fields
+        // Form fields with enhanced styling
         GridPane formGrid = new GridPane();
-        formGrid.setHgap(15);
-        formGrid.setVgap(10);
-        formGrid.setAlignment(Pos.CENTER);
+        formGrid.setHgap(20);
+        formGrid.setVgap(15);
+        formGrid.setPadding(new Insets(20));
         
-        // Name field
-        Label nameLabel = new Label("Name:");
-        nameField = new TextField();
-        nameField.setPromptText("Enter product name");
-        nameField.setPrefWidth(200);
-        formGrid.add(nameLabel, 0, 0);
+        // Style all form fields
+        styleFormField(nameField, "Product Name");
+        styleFormField(priceField, "Price");
+        styleFormField(quantityField, "Quantity");
+        styleFormField(reorderLevelField, "Reorder Level");
+        styleFormField(supplierIdField, "Supplier ID");
+        
+        // Add form fields to grid
+        formGrid.add(createFormLabel("📝 Product Name:"), 0, 0);
         formGrid.add(nameField, 1, 0);
         
-        // Price field
-        Label priceLabel = new Label("Price:");
-        priceField = new TextField();
-        priceField.setPromptText("Enter price");
-        priceField.setPrefWidth(200);
-        formGrid.add(priceLabel, 0, 1);
+        formGrid.add(createFormLabel("💰 Price:"), 0, 1);
         formGrid.add(priceField, 1, 1);
         
-        // Quantity field
-        Label quantityLabel = new Label("Quantity:");
-        quantityField = new TextField();
-        quantityField.setPromptText("Enter quantity");
-        quantityField.setPrefWidth(200);
-        formGrid.add(quantityLabel, 0, 2);
+        formGrid.add(createFormLabel("📦 Quantity:"), 0, 2);
         formGrid.add(quantityField, 1, 2);
         
-        // Reorder level field
-        Label reorderLabel = new Label("Reorder Level:");
-        reorderLevelField = new TextField();
-        reorderLevelField.setPromptText("Enter reorder level");
-        reorderLevelField.setPrefWidth(200);
-        formGrid.add(reorderLabel, 0, 3);
+        formGrid.add(createFormLabel("⚠️ Reorder Level:"), 0, 3);
         formGrid.add(reorderLevelField, 1, 3);
         
-        // Supplier ID field
-        Label supplierLabel = new Label("Supplier ID:");
-        supplierIdField = new TextField();
-        supplierIdField.setPromptText("Enter supplier ID (optional)");
-        supplierIdField.setPrefWidth(200);
-        formGrid.add(supplierLabel, 0, 4);
+        formGrid.add(createFormLabel("🏢 Supplier ID:"), 0, 4);
         formGrid.add(supplierIdField, 1, 4);
         
         formContainer.getChildren().addAll(formTitle, formGrid);
         root.getChildren().add(formContainer);
     }
     
-    private void createActionButtons() {
-        HBox buttonContainer = new HBox(15);
-        buttonContainer.setAlignment(Pos.CENTER);
-        buttonContainer.setPadding(new Insets(20));
+    private Label createFormLabel(String text) {
+        Label label = new Label(text);
+        label.setStyle("-fx-font-weight: bold; -fx-text-fill: #ffffff; -fx-font-size: 16px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 2, 0, 0, 0);");
+        return label;
+    }
+    
+    private void styleFormField(TextField field, String prompt) {
+        field.setPromptText(prompt);
+        field.setPrefHeight(40);
+        field.setPrefWidth(250);
+        field.setStyle("-fx-font-size: 14; -fx-background-radius: 20; -fx-background-color: rgba(255,255,255,0.95); -fx-border-radius: 20; -fx-border-color: #4a90e2; -fx-border-width: 2; -fx-padding: 8 15; -fx-text-fill: #2c3e50;");
+    }
+    
+    private void createButtons() {
+        VBox buttonContainer = new VBox(20);
+        buttonContainer.setPadding(new Insets(25));
+        buttonContainer.setStyle("-fx-background-color: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 15, 0, 0, 0); -fx-border-color: rgba(74, 144, 226, 0.3); -fx-border-width: 2; -fx-border-radius: 20;");
         
-        // Add button
+        Label buttonTitle = new Label("🎯 Product Actions");
+        buttonTitle.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #ffffff; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 3, 0, 0, 0);");
+        
+        HBox buttonBox = new HBox(20);
+        buttonBox.setAlignment(Pos.CENTER);
+        
         Button addBtn = new Button("➕ Add Product");
-        addBtn.setPrefSize(120, 40);
-        addBtn.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
+        addBtn.setStyle("-fx-background-color: rgba(46, 204, 113, 0.8); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 25; -fx-border-color: #2ecc71; -fx-border-width: 2; -fx-border-radius: 25; -fx-padding: 15 30; -fx-font-size: 16px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 0);");
         addBtn.setOnAction(e -> addProduct());
-        addBtn.setTooltip(new Tooltip("Add New Product (Ctrl+N)"));
         
-        // Update button
         Button updateBtn = new Button("✏️ Update Product");
-        updateBtn.setPrefSize(120, 40);
-        updateBtn.setStyle("-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
+        updateBtn.setStyle("-fx-background-color: rgba(243, 156, 18, 0.8); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 25; -fx-border-color: #f39c12; -fx-border-width: 2; -fx-border-radius: 25; -fx-padding: 15 30; -fx-font-size: 16px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 0);");
         updateBtn.setOnAction(e -> updateProduct());
-        updateBtn.setTooltip(new Tooltip("Update Selected Product (Ctrl+U)"));
         
-        // Delete button (admin only)
         Button deleteBtn = new Button("🗑️ Delete Product");
-        deleteBtn.setPrefSize(120, 40);
-        deleteBtn.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
+        deleteBtn.setStyle("-fx-background-color: rgba(231, 76, 60, 0.8); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 25; -fx-border-color: #e74c3c; -fx-border-width: 2; -fx-border-radius: 25; -fx-padding: 15 30; -fx-font-size: 16px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 0);");
         deleteBtn.setOnAction(e -> deleteProduct());
-        deleteBtn.setVisible(userManager.getCurrentUser() != null && userManager.getCurrentUser().canDelete());
-        deleteBtn.setTooltip(new Tooltip("Delete Selected Product (Ctrl+D)"));
         
-        // Clear form button
-        Button clearBtn = new Button("💾 Clear Form");
-        clearBtn.setPrefSize(120, 40);
-        clearBtn.setStyle("-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
+        Button clearBtn = new Button("🧹 Clear Form");
+        clearBtn.setStyle("-fx-background-color: rgba(149, 165, 166, 0.8); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 25; -fx-border-color: #95a5a6; -fx-border-width: 2; -fx-border-radius: 25; -fx-padding: 15 30; -fx-font-size: 16px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 0);");
         clearBtn.setOnAction(e -> clearForm());
-        clearBtn.setTooltip(new Tooltip("Clear Form (Ctrl+C)"));
         
-        buttonContainer.getChildren().addAll(addBtn, updateBtn, deleteBtn, clearBtn);
+        Button backBtn = new Button("🏠 Back to Dashboard");
+        backBtn.setStyle("-fx-background-color: rgba(52, 73, 94, 0.8); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 25; -fx-border-color: #34495e; -fx-border-width: 2; -fx-border-radius: 25; -fx-padding: 15 30; -fx-font-size: 16px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 0);");
+        backBtn.setOnAction(e -> app.showDashboard());
+        
+        // Add hover effects for all buttons
+        addHoverEffects(addBtn);
+        addHoverEffects(updateBtn);
+        addHoverEffects(deleteBtn);
+        addHoverEffects(clearBtn);
+        addHoverEffects(backBtn);
+        
+        buttonBox.getChildren().addAll(addBtn, updateBtn, deleteBtn, clearBtn, backBtn);
+        
+        // Status label with enhanced styling
+        statusLabel.setStyle("-fx-text-fill: #ffffff; -fx-font-weight: bold; -fx-font-size: 16px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 2, 0, 0, 0);");
+        statusLabel.setAlignment(Pos.CENTER);
+        
+        buttonContainer.getChildren().addAll(buttonTitle, buttonBox, statusLabel);
         root.getChildren().add(buttonContainer);
     }
     
-    private void createBackButton() {
-        HBox backContainer = new HBox();
-        backContainer.setAlignment(Pos.CENTER_LEFT);
-        backContainer.setPadding(new Insets(20, 0, 0, 0));
-        
-        Button backBtn = new Button("← Back to Dashboard");
-        backBtn.setPrefSize(150, 40);
-        backBtn.setStyle("-fx-background-color: #34495e; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
-        backBtn.setOnAction(e -> app.showDashboard());
-        backBtn.setTooltip(new Tooltip("Back to Dashboard (Ctrl+B)"));
-        
-        backContainer.getChildren().add(backBtn);
-        root.getChildren().add(backContainer);
+    private void addHoverEffects(Button button) {
+        button.setOnMouseEntered(e -> {
+            String currentStyle = button.getStyle();
+            if (currentStyle.contains("0.8")) {
+                button.setStyle(currentStyle.replace("0.8", "1.0").replace("2", "3"));
+            }
+        });
+        button.setOnMouseExited(e -> {
+            String currentStyle = button.getStyle();
+            if (currentStyle.contains("1.0")) {
+                button.setStyle(currentStyle.replace("1.0", "0.8").replace("3", "2"));
+            }
+        });
     }
     
-    private void loadProductsData() {
+    private void applyCurrentTheme() {
+        String theme = InventoryManagementApp.getCurrentTheme();
+        
+        if ("dark".equals(theme)) {
+            // Dark theme - keep the current dark design
+            root.setStyle("-fx-background-color: linear-gradient(to bottom, #1a1a2e 0%, #16213e 100%);");
+            
+        } else {
+            // Light theme - switch to lighter colors
+            root.setStyle("-fx-background-color: linear-gradient(to bottom, #ecf0f1 0%, #bdc3c7 100%);");
+            
+            // Update header for light theme
+            // Note: This would require more complex theme switching logic
+            // For now, we'll keep the dark theme as default
+        }
+    }
+    
+    private void loadProducts() {
         try {
             List<Product> products = inventoryManager.getProducts();
-            productsData.clear();
+            ObservableList<Product> productsData = FXCollections.observableArrayList();
             productsData.addAll(products);
+            productTable.setItems(productsData);
         } catch (Exception e) {
             InventoryManagementApp.showError("Error", "Failed to load products", e.getMessage());
         }
     }
     
-    private void performSearch(String name, String minPrice, String maxPrice, String supplierId) {
+    private void performSearch() {
         try {
             List<Product> products = inventoryManager.getProducts();
-            List<Product> filteredProducts = products.stream()
-                .filter(product -> name.isEmpty() || product.getName().toLowerCase().contains(name.toLowerCase()))
-                .filter(product -> minPrice.isEmpty() || product.getPrice() >= Double.parseDouble(minPrice))
-                .filter(product -> maxPrice.isEmpty() || product.getPrice() <= Double.parseDouble(maxPrice))
-                .filter(product -> supplierId.isEmpty() || product.getSupplierId().equals(supplierId))
-                .toList();
+            ObservableList<Product> filteredProducts = FXCollections.observableArrayList();
+            String searchTerm = searchField.getText().trim();
             
-            productsData.clear();
-            productsData.addAll(filteredProducts);
+            filteredProducts.addAll(products.stream()
+                .filter(product -> searchTerm.isEmpty() || product.getName().toLowerCase().contains(searchTerm.toLowerCase()))
+                .filter(product -> searchTerm.isEmpty() || String.valueOf(product.getPrice()).contains(searchTerm))
+                .filter(product -> searchTerm.isEmpty() || String.valueOf(product.getQuantity()).contains(searchTerm))
+                .toList());
             
-        } catch (NumberFormatException e) {
-            InventoryManagementApp.showError("Search Error", "Invalid price format", "Please enter valid numbers for price range.");
+            productTable.setItems(filteredProducts);
+            
         } catch (Exception e) {
             InventoryManagementApp.showError("Search Error", "Failed to perform search", e.getMessage());
         }
     }
     
-    private void populateForm(Product product) {
+    private void loadProductToForm(Product product) {
         if (product != null) {
             nameField.setText(product.getName());
             priceField.setText(String.valueOf(product.getPrice()));
@@ -420,30 +383,37 @@ public class ProductsScreen {
         quantityField.clear();
         reorderLevelField.clear();
         supplierIdField.clear();
-        productsTable.getSelectionModel().clearSelection();
+        productTable.getSelectionModel().clearSelection();
     }
     
     private void addProduct() {
         try {
-            // Validate input
-            if (nameField.getText().trim().isEmpty()) {
-                InventoryManagementApp.showError("Validation Error", "Name is required", "Please enter a product name.");
+            String name = nameField.getText().trim();
+            String priceText = priceField.getText().trim();
+            String quantityText = quantityField.getText().trim();
+            String reorderLevelText = reorderLevelField.getText().trim();
+            String supplierId = supplierIdField.getText().trim();
+            
+            if (name.isEmpty() || priceText.isEmpty() || quantityText.isEmpty() || reorderLevelText.isEmpty()) {
+                InventoryManagementApp.showError("Validation Error", "Missing fields", "Please fill in all required fields.");
                 return;
             }
             
-            double price = Double.parseDouble(priceField.getText().trim());
-            int quantity = Integer.parseInt(quantityField.getText().trim());
-            int reorderLevel = Integer.parseInt(reorderLevelField.getText().trim());
-            String supplierId = supplierIdField.getText().trim();
+            double price = Double.parseDouble(priceText);
+            int quantity = Integer.parseInt(quantityText);
+            int reorderLevel = Integer.parseInt(reorderLevelText);
             
             if (price <= 0 || quantity < 0 || reorderLevel < 0) {
                 InventoryManagementApp.showError("Validation Error", "Invalid values", "Price must be positive, quantity and reorder level must be non-negative.");
                 return;
             }
             
+            // Generate a simple ID for new products
+            String id = "P" + System.currentTimeMillis();
+            
             Product newProduct = new Product(
-                inventoryManager.generateProductId(), // Generate a new ID
-                nameField.getText().trim(),
+                id,
+                name,
                 price,
                 quantity,
                 reorderLevel,
@@ -451,10 +421,10 @@ public class ProductsScreen {
             );
             
             inventoryManager.addProduct(newProduct);
-            InventoryManagementApp.showInfo("Add Product", "Product Added", "Product successfully added to inventory.");
+            InventoryManagementApp.showInfo("Add Product", "Product Added", "Product successfully added.");
             
             clearForm();
-            loadProductsData();
+            loadProducts();
             
         } catch (NumberFormatException e) {
             InventoryManagementApp.showError("Validation Error", "Invalid number format", "Please enter valid numbers for price, quantity, and reorder level.");
@@ -464,30 +434,34 @@ public class ProductsScreen {
     }
     
     private void updateProduct() {
-        Product selectedProduct = productsTable.getSelectionModel().getSelectedItem();
+        Product selectedProduct = productTable.getSelectionModel().getSelectedItem();
         if (selectedProduct == null) {
             InventoryManagementApp.showWarning("No Selection", "No product selected", "Please select a product to update.");
             return;
         }
         
         try {
-            // Validate input
-            if (nameField.getText().trim().isEmpty()) {
-                InventoryManagementApp.showError("Validation Error", "Name is required", "Please enter a product name.");
+            String name = nameField.getText().trim();
+            String priceText = priceField.getText().trim();
+            String quantityText = quantityField.getText().trim();
+            String reorderLevelText = reorderLevelField.getText().trim();
+            String supplierId = supplierIdField.getText().trim();
+            
+            if (name.isEmpty() || priceText.isEmpty() || quantityText.isEmpty() || reorderLevelText.isEmpty()) {
+                InventoryManagementApp.showError("Validation Error", "Missing fields", "Please fill in all required fields.");
                 return;
             }
             
-            double price = Double.parseDouble(priceField.getText().trim());
-            int quantity = Integer.parseInt(quantityField.getText().trim());
-            int reorderLevel = Integer.parseInt(reorderLevelField.getText().trim());
-            String supplierId = supplierIdField.getText().trim();
+            double price = Double.parseDouble(priceText);
+            int quantity = Integer.parseInt(quantityText);
+            int reorderLevel = Integer.parseInt(reorderLevelText);
             
             if (price <= 0 || quantity < 0 || reorderLevel < 0) {
                 InventoryManagementApp.showError("Validation Error", "Invalid values", "Price must be positive, quantity and reorder level must be non-negative.");
                 return;
             }
             
-            selectedProduct.setName(nameField.getText().trim());
+            selectedProduct.setName(name);
             selectedProduct.setPrice(price);
             selectedProduct.setQuantity(quantity);
             selectedProduct.setReorderLevel(reorderLevel);
@@ -497,7 +471,7 @@ public class ProductsScreen {
             InventoryManagementApp.showInfo("Update Product", "Product Updated", "Product successfully updated.");
             
             clearForm();
-            loadProductsData();
+            loadProducts();
             
         } catch (NumberFormatException e) {
             InventoryManagementApp.showError("Validation Error", "Invalid number format", "Please enter valid numbers for price, quantity, and reorder level.");
@@ -507,7 +481,7 @@ public class ProductsScreen {
     }
     
     private void deleteProduct() {
-        Product selectedProduct = productsTable.getSelectionModel().getSelectedItem();
+        Product selectedProduct = productTable.getSelectionModel().getSelectedItem();
         if (selectedProduct == null) {
             InventoryManagementApp.showWarning("No Selection", "No product selected", "Please select a product to delete.");
             return;
@@ -520,7 +494,7 @@ public class ProductsScreen {
                     InventoryManagementApp.showInfo("Delete Product", "Product Deleted", "Product successfully deleted.");
                     
                     clearForm();
-                    loadProductsData();
+                    loadProducts();
                     
                 } catch (Exception e) {
                     InventoryManagementApp.showError("Error", "Failed to delete product", e.getMessage());
@@ -529,6 +503,23 @@ public class ProductsScreen {
     }
     
     public VBox getRoot() {
-        return root;
+        // Create scroll pane wrapper
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setContent(root);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setPrefViewportHeight(600);
+        scrollPane.setPrefViewportWidth(800);
+        scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
+        
+        // Improve scroll pane behavior
+        scrollPane.setPannable(true);
+        scrollPane.setMinViewportHeight(400);
+        scrollPane.setMinViewportWidth(600);
+        
+        VBox container = new VBox();
+        container.getChildren().add(scrollPane);
+        return container;
     }
 }

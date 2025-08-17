@@ -60,6 +60,10 @@ public class UserManager {
         return currentUser;
     }
     
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+    }
+    
     public boolean isLoggedIn() {
         return currentUser != null;
     }
@@ -181,7 +185,7 @@ public class UserManager {
     }
     
     // Helper Methods
-    private User authenticateUser(String username, String password) {
+    public User authenticateUser(String username, String password) {
         for (User user : users) {
             if (user.getUsername().equals(username) && user.getPassword().equals(password)) {
                 return user;

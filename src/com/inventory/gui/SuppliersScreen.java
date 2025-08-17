@@ -15,15 +15,17 @@ import com.inventory.managers.SupplierManager;
 import com.inventory.managers.UserManager;
 import java.util.List;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.paint.Color;
+import javafx.scene.effect.DropShadow;
 
 public class SuppliersScreen {
     
-    private final InventoryManagementApp app;
+    private InventoryManagementApp app;
     private VBox root;
     private TableView<Supplier> suppliersTable;
     private ObservableList<Supplier> suppliersData;
-    private final SupplierManager supplierManager;
-    private final UserManager userManager;
+    private SupplierManager supplierManager;
+    private UserManager userManager;
     
     // Form fields
     private TextField nameField;
@@ -38,11 +40,11 @@ public class SuppliersScreen {
         suppliersData = FXCollections.observableArrayList();
         loadSuppliersData();
         
-        // Create main container
-        root = new VBox(20);
+        // Create main container with beautiful background
+        root = new VBox(25);
         root.setAlignment(Pos.TOP_CENTER);
-        root.setPadding(new Insets(20));
-        root.setStyle("-fx-background-color: #f5f5f5;");
+        root.setPadding(new Insets(25));
+        root.setStyle("-fx-background-color: linear-gradient(to bottom, #45B7D1 0%, #96CEB4 100%); -fx-background-radius: 0;");
         
         // Create header
         createHeader();
@@ -67,6 +69,12 @@ public class SuppliersScreen {
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.setPrefViewportHeight(600);
         scrollPane.setPrefViewportWidth(800);
+        scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
+        
+        // Improve scroll pane behavior
+        scrollPane.setPannable(true);
+        scrollPane.setMinViewportHeight(400);
+        scrollPane.setMinViewportWidth(600);
         
         // Set the scroll pane as the root
         VBox scrollRoot = new VBox();
@@ -75,58 +83,63 @@ public class SuppliersScreen {
     }
     
     private void createHeader() {
-        VBox header = new VBox(10);
-        header.setAlignment(Pos.CENTER);
-        header.setPadding(new Insets(0, 0, 20, 0));
+        HBox header = new HBox(20);
+        header.setAlignment(Pos.CENTER_LEFT);
+        header.setPadding(new Insets(20, 30, 20, 30));
+        header.setStyle("-fx-background-color: linear-gradient(to right, #45B7D1 0%, #96CEB4 100%); -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 0);");
         
-        Text title = new Text("Suppliers Management");
-        title.setFont(Font.font("Arial", FontWeight.BOLD, 32));
-        title.setStyle("-fx-fill: #2c3e50;");
+        Text title = new Text("🏢 Suppliers Management");
+        title.setFont(Font.font("Segoe UI", FontWeight.BOLD, 32));
+        title.setStyle("-fx-fill: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 3, 0, 0, 0);");
         
-        Text subtitle = new Text("Manage supplier information and relationships");
-        subtitle.setFont(Font.font("Arial", FontWeight.NORMAL, 16));
-        subtitle.setStyle("-fx-fill: #7f8c8d;");
+        Text subtitle = new Text("Manage your supplier relationships");
+        subtitle.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 18));
+        subtitle.setStyle("-fx-fill: rgba(255,255,255,0.9); -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 2, 0, 0, 0);");
         
-        header.getChildren().addAll(title, subtitle);
+        VBox titleBox = new VBox(8);
+        titleBox.getChildren().addAll(title, subtitle);
+        
+        header.getChildren().add(titleBox);
+        VBox.setMargin(header, new Insets(0, 0, 30, 0));
         root.getChildren().add(header);
     }
     
     private void createSuppliersTable() {
-        VBox tableContainer = new VBox(15);
-        tableContainer.setAlignment(Pos.CENTER);
-        tableContainer.setPadding(new Insets(20));
-        tableContainer.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 0);");
+        VBox tableContainer = new VBox(20);
+        tableContainer.setPadding(new Insets(25));
+        tableContainer.setStyle("-fx-background-color: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 15, 0, 0, 0); -fx-border-color: rgba(255,255,255,0.3); -fx-border-width: 2; -fx-border-radius: 20;");
         
-        Text tableTitle = new Text("Suppliers Table");
-        tableTitle.setFont(Font.font("Arial", FontWeight.BOLD, 18));
-        tableTitle.setStyle("-fx-fill: #2c3e50;");
+        Label tableTitle = new Label("📋 Suppliers List");
+        tableTitle.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 3, 0, 0, 0);");
         
-        // Create table
-        suppliersTable = new TableView<>();
-        suppliersTable.setItems(suppliersData);
-        suppliersTable.setPrefHeight(400);
-        suppliersTable.setPlaceholder(new Label("No suppliers found"));
+        // Style the table
+        suppliersTable.setStyle("-fx-background-color: rgba(255,255,255,0.9); -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 0);");
+        suppliersTable.setPrefHeight(350);
         
-        // Create columns
-        TableColumn<Supplier, String> idCol = new TableColumn<>("ID");
+        // Create table columns with better styling
+        TableColumn<Supplier, String> idCol = new TableColumn<>("🆔 Supplier ID");
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
-        idCol.setPrefWidth(100);
+        idCol.setPrefWidth(120);
+        idCol.setStyle("-fx-background-color: linear-gradient(to bottom, #FF6B6B 0%, #4ECDC4 100%); -fx-text-fill: white;");
         
-        TableColumn<Supplier, String> nameCol = new TableColumn<>("Name");
+        TableColumn<Supplier, String> nameCol = new TableColumn<>("🏢 Company Name");
         nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
-        nameCol.setPrefWidth(250);
+        nameCol.setPrefWidth(200);
+        nameCol.setStyle("-fx-background-color: linear-gradient(to bottom, #FF6B6B 0%, #4ECDC4 100%); -fx-text-fill: white;");
         
-        TableColumn<Supplier, String> contactCol = new TableColumn<>("Contact Information");
+        TableColumn<Supplier, String> contactCol = new TableColumn<>("📞 Contact Info");
         contactCol.setCellValueFactory(new PropertyValueFactory<>("contactInfo"));
-        contactCol.setPrefWidth(300);
+        contactCol.setPrefWidth(250);
+        contactCol.setStyle("-fx-background-color: linear-gradient(to bottom, #FF6B6B 0%, #4ECDC4 100%); -fx-text-fill: white;");
         
-        // Add columns to table
         suppliersTable.getColumns().addAll(idCol, nameCol, contactCol);
         
-        // Handle row selection
+        // Row selection with enhanced styling
         suppliersTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
-                populateForm(newSelection);
+                loadSupplierToForm(newSelection);
+                // Highlight selected row
+                suppliersTable.setStyle("-fx-background-color: rgba(255,255,255,0.95); -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 15, 0, 0, 0);");
             }
         });
         
@@ -135,87 +148,116 @@ public class SuppliersScreen {
     }
     
     private void createFormSection() {
-        VBox formContainer = new VBox(15);
-        formContainer.setAlignment(Pos.CENTER);
-        formContainer.setPadding(new Insets(20));
-        formContainer.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 0);");
+        VBox formContainer = new VBox(20);
+        formContainer.setPadding(new Insets(25));
+        formContainer.setStyle("-fx-background-color: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 15, 0, 0, 0); -fx-border-color: rgba(255,255,255,0.3); -fx-border-width: 2; -fx-border-radius: 20;");
         
-        Text formTitle = new Text("Add/Edit Supplier");
-        formTitle.setFont(Font.font("Arial", FontWeight.BOLD, 18));
-        formTitle.setStyle("-fx-fill: #2c3e50;");
+        Label formTitle = new Label("✏️ Add/Edit Supplier");
+        formTitle.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 3, 0, 0, 0);");
         
-        // Create form fields
+        // Form fields with enhanced styling
         GridPane formGrid = new GridPane();
-        formGrid.setHgap(15);
-        formGrid.setVgap(10);
-        formGrid.setAlignment(Pos.CENTER);
+        formGrid.setHgap(20);
+        formGrid.setVgap(15);
+        formGrid.setPadding(new Insets(20));
         
-        // Name field
-        Label nameLabel = new Label("Name:");
-        nameField = new TextField();
-        nameField.setPromptText("Enter supplier name");
-        nameField.setPrefWidth(300);
-        formGrid.add(nameLabel, 0, 0);
+        // Style form fields
+        styleFormField(nameField, "Company Name");
+        styleFormField(contactInfoField, "Contact Information");
+        
+        // Add form fields to grid
+        formGrid.add(createFormLabel("🏢 Company Name:"), 0, 0);
         formGrid.add(nameField, 1, 0);
         
-        // Contact info field
-        Label contactLabel = new Label("Contact Information:");
-        contactInfoField = new TextField();
-        contactInfoField.setPromptText("Enter contact information");
-        contactInfoField.setPrefWidth(300);
-        formGrid.add(contactLabel, 0, 1);
+        formGrid.add(createFormLabel("📞 Contact Info:"), 0, 1);
         formGrid.add(contactInfoField, 1, 1);
         
         formContainer.getChildren().addAll(formTitle, formGrid);
         root.getChildren().add(formContainer);
     }
     
+    private Label createFormLabel(String text) {
+        Label label = new Label(text);
+        label.setStyle("-fx-font-weight: bold; -fx-text-fill: white; -fx-font-size: 16px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 2, 0, 0, 0);");
+        return label;
+    }
+    
+    private void styleFormField(TextField field, String prompt) {
+        field.setPromptText(prompt);
+        field.setPrefHeight(40);
+        field.setPrefWidth(300);
+        field.setStyle("-fx-font-size: 14; -fx-background-radius: 20; -fx-background-color: rgba(255,255,255,0.9); -fx-border-radius: 20; -fx-border-color: white; -fx-border-width: 2; -fx-padding: 8 15;");
+    }
+    
     private void createActionButtons() {
-        HBox buttonContainer = new HBox(15);
-        buttonContainer.setAlignment(Pos.CENTER);
-        buttonContainer.setPadding(new Insets(20));
+        VBox buttonContainer = new VBox(20);
+        buttonContainer.setPadding(new Insets(25));
+        buttonContainer.setStyle("-fx-background-color: linear-gradient(135deg, #fa709a 0%, #fee140 100%); -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 15, 0, 0, 0); -fx-border-color: rgba(255,255,255,0.3); -fx-border-width: 2; -fx-border-radius: 20;");
         
-        // Add button
+        Label buttonTitle = new Label("🎯 Supplier Actions");
+        buttonTitle.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 3, 0, 0, 0);");
+        
+        HBox buttonBox = new HBox(20);
+        buttonBox.setAlignment(Pos.CENTER);
+        
         Button addBtn = new Button("➕ Add Supplier");
-        addBtn.setPrefSize(120, 40);
-        addBtn.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
+        addBtn.setStyle("-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 25; -fx-border-color: white; -fx-border-width: 2; -fx-border-radius: 25; -fx-padding: 15 30; -fx-font-size: 16px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 0);");
         addBtn.setOnAction(e -> addSupplier());
         
-        // Update button
         Button updateBtn = new Button("✏️ Update Supplier");
-        updateBtn.setPrefSize(120, 40);
-        updateBtn.setStyle("-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
+        updateBtn.setStyle("-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 25; -fx-border-color: white; -fx-border-width: 2; -fx-border-radius: 25; -fx-padding: 15 30; -fx-font-size: 16px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 0);");
         updateBtn.setOnAction(e -> updateSupplier());
         
-        // Delete button (admin only)
         Button deleteBtn = new Button("🗑️ Delete Supplier");
-        deleteBtn.setPrefSize(120, 40);
-        deleteBtn.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
+        deleteBtn.setStyle("-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 25; -fx-border-color: white; -fx-border-width: 2; -fx-border-radius: 25; -fx-padding: 15 30; -fx-font-size: 16px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 0);");
         deleteBtn.setOnAction(e -> deleteSupplier());
-        deleteBtn.setVisible(userManager.getCurrentUser() != null && userManager.getCurrentUser().canDelete());
         
-        // Clear form button
-        Button clearBtn = new Button("💾 Clear Form");
-        clearBtn.setPrefSize(120, 40);
-        clearBtn.setStyle("-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
+        Button clearBtn = new Button("🧹 Clear Form");
+        clearBtn.setStyle("-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 25; -fx-border-color: white; -fx-border-width: 2; -fx-border-radius: 25; -fx-padding: 15 30; -fx-font-size: 16px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 0);");
         clearBtn.setOnAction(e -> clearForm());
         
-        buttonContainer.getChildren().addAll(addBtn, updateBtn, deleteBtn, clearBtn);
+        // Add hover effects for all buttons
+        addHoverEffects(addBtn);
+        addHoverEffects(updateBtn);
+        addHoverEffects(deleteBtn);
+        addHoverEffects(clearBtn);
+        
+        buttonBox.getChildren().addAll(addBtn, updateBtn, deleteBtn, clearBtn);
+        
+        buttonContainer.getChildren().addAll(buttonTitle, buttonBox);
         root.getChildren().add(buttonContainer);
     }
     
     private void createBackButton() {
-        HBox backContainer = new HBox();
-        backContainer.setAlignment(Pos.CENTER_LEFT);
-        backContainer.setPadding(new Insets(20, 0, 0, 0));
+        VBox backContainer = new VBox(20);
+        backContainer.setPadding(new Insets(25));
+        backContainer.setStyle("-fx-background-color: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 15, 0, 0, 0); -fx-border-color: rgba(255,255,255,0.3); -fx-border-width: 2; -fx-border-radius: 20;");
         
-        Button backBtn = new Button("← Back to Dashboard");
-        backBtn.setPrefSize(150, 40);
-        backBtn.setStyle("-fx-background-color: #34495e; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
+        Label backTitle = new Label("🏠 Navigation");
+        backTitle.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 3, 0, 0, 0);");
+        
+        HBox backBox = new HBox(20);
+        backBox.setAlignment(Pos.CENTER);
+        
+        Button backBtn = new Button("🏠 Back to Dashboard");
+        backBtn.setStyle("-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 25; -fx-border-color: white; -fx-border-width: 2; -fx-border-radius: 25; -fx-padding: 15 30; -fx-font-size: 16px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 0);");
         backBtn.setOnAction(e -> app.showDashboard());
         
-        backContainer.getChildren().add(backBtn);
+        // Add hover effects for back button
+        addHoverEffects(backBtn);
+        
+        backBox.getChildren().add(backBtn);
+        backContainer.getChildren().addAll(backTitle, backBox);
         root.getChildren().add(backContainer);
+    }
+    
+    private void addHoverEffects(Button button) {
+        button.setOnMouseEntered(e -> {
+            button.setStyle("-fx-background-color: rgba(255,255,255,0.3); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 25; -fx-border-color: white; -fx-border-width: 3; -fx-border-radius: 25; -fx-padding: 15 30; -fx-font-size: 16px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 8, 0, 0, 0);");
+        });
+        button.setOnMouseExited(e -> {
+            button.setStyle("-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 25; -fx-border-color: white; -fx-border-width: 2; -fx-border-radius: 25; -fx-padding: 15 30; -fx-font-size: 16px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 0);");
+        });
     }
     
     private void loadSuppliersData() {
@@ -229,6 +271,13 @@ public class SuppliersScreen {
     }
     
     private void populateForm(Supplier supplier) {
+        if (supplier != null) {
+            nameField.setText(supplier.getName());
+            contactInfoField.setText(supplier.getContactInfo());
+        }
+    }
+
+    private void loadSupplierToForm(Supplier supplier) {
         if (supplier != null) {
             nameField.setText(supplier.getName());
             contactInfoField.setText(supplier.getContactInfo());
@@ -328,5 +377,170 @@ public class SuppliersScreen {
     
     public VBox getRoot() {
         return root;
+    }
+
+    private void applyCurrentTheme() {
+        String theme = InventoryManagementApp.getCurrentTheme();
+        
+        if ("dark".equals(theme)) {
+            // Dark theme
+            root.setStyle("-fx-background-color: #2c3e50;");
+            
+            // Header styling
+            for (javafx.scene.Node node : root.getChildren()) {
+                if (node instanceof HBox) {
+                    HBox header = (HBox) node;
+                    for (javafx.scene.Node child : header.getChildren()) {
+                        if (child instanceof javafx.scene.text.Text) {
+                            javafx.scene.text.Text text = (javafx.scene.text.Text) child;
+                            if (text.getText().contains("Suppliers Management")) {
+                                text.setFill(Color.WHITE);
+                            } else {
+                                text.setFill(Color.web("#bdc3c7"));
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Table container
+            for (javafx.scene.Node node : root.getChildren()) {
+                if (node instanceof VBox && ((VBox) node).getChildren().size() > 0) {
+                    VBox container = (VBox) node;
+                    if (container.getChildren().get(0) instanceof Label && 
+                        ((Label) container.getChildren().get(0)).getText().contains("Supplier List")) {
+                        container.setStyle("-fx-background-color: #34495e; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 0);");
+                        
+                        for (javafx.scene.Node child : container.getChildren()) {
+                            if (child instanceof Label) {
+                                Label label = (Label) child;
+                                label.setStyle("-fx-text-fill: #ecf0f1;");
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Form container
+            for (javafx.scene.Node node : root.getChildren()) {
+                if (node instanceof VBox && ((VBox) node).getChildren().size() > 0) {
+                    VBox container = (VBox) node;
+                    if (container.getChildren().get(0) instanceof Label && 
+                        ((Label) container.getChildren().get(0)).getText().contains("Add/Edit Supplier")) {
+                        container.setStyle("-fx-background-color: #34495e; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 0);");
+                        
+                        for (javafx.scene.Node child : container.getChildren()) {
+                            if (child instanceof Label) {
+                                Label label = (Label) child;
+                                label.setStyle("-fx-text-fill: #ecf0f1;");
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Buttons
+            for (javafx.scene.Node node : root.getChildren()) {
+                if (node instanceof HBox) {
+                    HBox buttonBox = (HBox) node;
+                    for (javafx.scene.Node child : buttonBox.getChildren()) {
+                        if (child instanceof Button) {
+                            Button button = (Button) child;
+                            if (button.getText().contains("Add")) {
+                                button.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
+                            } else if (button.getText().contains("Update")) {
+                                button.setStyle("-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
+                            } else if (button.getText().contains("Delete")) {
+                                button.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
+                            } else if (button.getText().contains("Clear")) {
+                                button.setStyle("-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
+                            } else if (button.getText().contains("Back")) {
+                                button.setStyle("-fx-background-color: #34495e; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
+                            }
+                        }
+                    }
+                }
+            }
+            
+        } else {
+            // Light theme
+            root.setStyle("-fx-background-color: #f5f5f5;");
+            
+            // Header styling
+            for (javafx.scene.Node node : root.getChildren()) {
+                if (node instanceof HBox) {
+                    HBox header = (HBox) node;
+                    for (javafx.scene.Node child : header.getChildren()) {
+                        if (child instanceof javafx.scene.text.Text) {
+                            javafx.scene.text.Text text = (javafx.scene.text.Text) child;
+                            if (text.getText().contains("Suppliers Management")) {
+                                text.setFill(Color.web("#2c3e50"));
+                            } else {
+                                text.setFill(Color.web("#7f8c8d"));
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Table container
+            for (javafx.scene.Node node : root.getChildren()) {
+                if (node instanceof VBox && ((VBox) node).getChildren().size() > 0) {
+                    VBox container = (VBox) node;
+                    if (container.getChildren().get(0) instanceof Label && 
+                        ((Label) container.getChildren().get(0)).getText().contains("Supplier List")) {
+                        container.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 0);");
+                        
+                        for (javafx.scene.Node child : container.getChildren()) {
+                            if (child instanceof Label) {
+                                Label label = (Label) child;
+                                label.setStyle("-fx-text-fill: #2c3e50;");
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Form container
+            for (javafx.scene.Node node : root.getChildren()) {
+                if (node instanceof VBox && ((VBox) node).getChildren().size() > 0) {
+                    VBox container = (VBox) node;
+                    if (container.getChildren().get(0) instanceof Label && 
+                        ((Label) container.getChildren().get(0)).getText().contains("Add/Edit Supplier")) {
+                        container.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 0);");
+                        
+                        for (javafx.scene.Node child : container.getChildren()) {
+                            if (child instanceof Label) {
+                                Label label = (Label) child;
+                                label.setStyle("-fx-text-fill: #2c3e50;");
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Buttons
+            for (javafx.scene.Node node : root.getChildren()) {
+                if (node instanceof HBox) {
+                    HBox buttonBox = (HBox) node;
+                    for (javafx.scene.Node child : buttonBox.getChildren()) {
+                        if (child instanceof Button) {
+                            Button button = (Button) child;
+                            if (button.getText().contains("Add")) {
+                                button.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
+                            } else if (button.getText().contains("Update")) {
+                                button.setStyle("-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
+                            } else if (button.getText().contains("Delete")) {
+                                button.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
+                            } else if (button.getText().contains("Clear")) {
+                                button.setStyle("-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
+                            } else if (button.getText().contains("Back")) {
+                                button.setStyle("-fx-background-color: #34495e; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }

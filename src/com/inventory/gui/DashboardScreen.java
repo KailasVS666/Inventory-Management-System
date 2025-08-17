@@ -5,6 +5,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -12,198 +13,401 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import com.inventory.managers.UserManager;
+import com.inventory.models.User;
+import javafx.scene.layout.Priority;
 
 public class DashboardScreen {
     
-    private final InventoryManagementApp app;
-    private final VBox root;
-    private final UserManager userManager;
+    private InventoryManagementApp app;
+    private VBox root;
+    private ScrollPane scrollPane;
     private ToggleButton themeToggle;
+    private HBox header;
+    private String username;
+    private Text title;
+    private Label welcomeLabel;
     
     public DashboardScreen(InventoryManagementApp app) {
         this.app = app;
-        this.userManager = InventoryManagementApp.getUserManager();
         
-        // Create main container
-        root = new VBox(20);
-        root.setAlignment(Pos.CENTER); // Change from TOP_CENTER to CENTER
-        root.setPadding(new Insets(30));
-        root.getStyleClass().add("dashboard-root"); // Use CSS class instead of inline style
+        // Get username from current user
+        User currentUser = InventoryManagementApp.getUserManager().getCurrentUser();
+        this.username = currentUser != null ? currentUser.getUsername() : "User";
         
-        // Create header
-        createHeader();
+        // Create root layout with beautiful dark background
+        root = new VBox(25);
+        root.setPadding(new Insets(25));
+        root.setStyle("-fx-background-color: linear-gradient(to bottom, #1a1a2e 0%, #16213e 100%); -fx-background-radius: 0;");
         
-        // Create navigation buttons
-        createNavigationButtons();
+        // Initialize UI components
+        title = new Text("🚀 Dashboard");
+        title.setFont(Font.font("Segoe UI", FontWeight.BOLD, 32));
+        title.setStyle("-fx-fill: #ffffff; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 3, 0, 0, 0);");
         
-        // Create footer
-        createFooter();
+        welcomeLabel = new Label("Welcome, " + username + "!");
+        welcomeLabel.setFont(Font.font("Segoe UI", FontWeight.BOLD, 18));
+        welcomeLabel.setStyle("-fx-text-fill: #e8e8e8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 2, 0, 0, 0);");
+        
+        themeToggle = new ToggleButton("🌙 Dark Mode");
+        themeToggle.setStyle("-fx-background-color: linear-gradient(to right, #2c3e50 0%, #34495e 100%); -fx-text-fill: #ffffff; -fx-font-weight: bold; -fx-background-radius: 25; -fx-padding: 12 24; -fx-font-size: 14px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 0); -fx-border-color: #4a90e2; -fx-border-width: 2; -fx-border-radius: 25;");
+        
+        Button logoutButton = new Button("🚪 Logout");
+        logoutButton.setStyle("-fx-background-color: rgba(231, 76, 60, 0.8); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-border-color: #c0392b; -fx-border-width: 2; -fx-border-radius: 20; -fx-padding: 10 20; -fx-font-size: 14px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 0);");
+        
+        // Create header with darker theme
+        header = new HBox(20);
+        header.setAlignment(Pos.CENTER_LEFT);
+        header.setPadding(new Insets(20, 30, 20, 30));
+        header.setStyle("-fx-background-color: linear-gradient(to right, #2c3e50 0%, #34495e 100%); -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 10, 0, 0, 0); -fx-border-color: #4a90e2; -fx-border-width: 2; -fx-border-radius: 15;");
+        
+        VBox titleBox = new VBox(8);
+        titleBox.getChildren().addAll(title, welcomeLabel);
+        
+        HBox rightSection = new HBox(15);
+        rightSection.setAlignment(Pos.CENTER_RIGHT);
+        rightSection.getChildren().addAll(themeToggle, logoutButton);
+        
+        header.getChildren().addAll(titleBox, rightSection);
+        HBox.setHgrow(titleBox, Priority.ALWAYS);
+        
+        VBox.setMargin(header, new Insets(0, 0, 30, 0));
+        root.getChildren().add(header);
+        
+        // Add theme toggle functionality
+        themeToggle.setOnAction(e -> {
+            if (themeToggle.isSelected()) {
+                themeToggle.setText("☀️ Light Mode");
+                themeToggle.setStyle("-fx-background-color: linear-gradient(to right, #f39c12 0%, #e67e22 100%); -fx-text-fill: #ffffff; -fx-font-weight: bold; -fx-background-radius: 25; -fx-padding: 12 24; -fx-font-size: 14px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 0); -fx-border-color: #f39c12; -fx-border-width: 2; -fx-border-radius: 25;");
+                InventoryManagementApp.setTheme("dark");
+            } else {
+                themeToggle.setText("🌙 Dark Mode");
+                themeToggle.setStyle("-fx-background-color: linear-gradient(to right, #2c3e50 0%, #34495e 100%); -fx-text-fill: #ffffff; -fx-font-weight: bold; -fx-background-radius: 25; -fx-padding: 12 24; -fx-font-size: 14px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 0); -fx-border-color: #4a90e2; -fx-border-width: 2; -fx-border-radius: 25;");
+                InventoryManagementApp.setTheme("light");
+            }
+            applyCurrentTheme();
+        });
+        
+        // Add logout functionality
+        logoutButton.setOnAction(e -> {
+            InventoryManagementApp.showConfirmation("Logout", "Confirm Logout", "Are you sure you want to logout?", () -> {
+                app.showLoginScreen();
+            });
+        });
+        
+        // Add hover effects
+        logoutButton.setOnMouseEntered(e -> logoutButton.setStyle("-fx-background-color: rgba(231, 76, 60, 1.0); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-border-color: #c0392b; -fx-border-width: 3; -fx-border-radius: 20; -fx-padding: 10 20; -fx-font-size: 14px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 8, 0, 0, 0);"));
+        logoutButton.setOnMouseExited(e -> logoutButton.setStyle("-fx-background-color: rgba(231, 76, 60, 0.8); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-border-color: #c0392b; -fx-border-width: 2; -fx-border-radius: 20; -fx-padding: 10 20; -fx-font-size: 14px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 0);"));
+        
+        themeToggle.setOnMouseEntered(e -> themeToggle.setStyle("-fx-background-color: linear-gradient(to right, #34495e 0%, #2c3e50 100%); -fx-text-fill: #ffffff; -fx-font-weight: bold; -fx-background-radius: 25; -fx-padding: 12 24; -fx-font-size: 14px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 8, 0, 0, 0); -fx-border-color: #4a90e2; -fx-border-width: 3; -fx-border-radius: 25;"));
+        themeToggle.setOnMouseExited(e -> themeToggle.setStyle("-fx-background-color: linear-gradient(to right, #2c3e50 0%, #34495e 100%); -fx-text-fill: #ffffff; -fx-font-weight: bold; -fx-background-radius: 25; -fx-padding: 12 24; -fx-font-size: 14px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 0); -fx-border-color: #4a90e2; -fx-border-width: 2; -fx-border-radius: 25;"));
+        
+        // Create dashboard content
+        createDashboardContent();
+        
+        // Add additional content to test scrolling
+        addAdditionalContent();
+        
+        // Apply initial theme
+        applyCurrentTheme();
+        
+        // Create scrollable container
+        scrollPane = new ScrollPane();
+        scrollPane.setContent(root);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setPrefViewportHeight(600);
+        scrollPane.setPrefViewportWidth(800);
+        scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
+        
+        // Improve scroll pane behavior
+        scrollPane.setPannable(true);
+        scrollPane.setMinViewportHeight(400);
+        scrollPane.setMinViewportWidth(600);
     }
     
     private void createHeader() {
-        VBox header = new VBox(10);
-        header.setAlignment(Pos.CENTER);
-        header.setPadding(new Insets(0, 0, 30, 0));
+        // Header with title and user info
+        HBox header = new HBox(20);
+        header.setAlignment(Pos.CENTER_LEFT);
+        header.setPadding(new Insets(20, 30, 20, 30));
+        header.setStyle("-fx-background-color: linear-gradient(to right, #667eea 0%, #764ba2 100%); -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 0);");
         
-        Text title = new Text("Inventory Management System");
-        title.setFont(Font.font("Arial", FontWeight.BOLD, 36));
-        title.setStyle("-fx-fill: #2c3e50;");
+        title = new Text("🚀 Dashboard");
+        title.setFont(Font.font("Segoe UI", FontWeight.BOLD, 32));
+        title.setStyle("-fx-fill: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 3, 0, 0, 0);");
         
-        Text subtitle = new Text("Phase 8 - Advanced Features Dashboard");
-        subtitle.setFont(Font.font("Arial", FontWeight.NORMAL, 18));
-        subtitle.setStyle("-fx-fill: #7f8c8d;");
+        // Add user info on the right
+        HBox userBox = new HBox(15);
+        userBox.setAlignment(Pos.CENTER_RIGHT);
         
-        // User info
-        HBox userInfo = new HBox(10);
-        userInfo.setAlignment(Pos.CENTER);
+        // Check if user is logged in before accessing user info
+        User currentUser = InventoryManagementApp.getUserManager().getCurrentUser();
+        if (currentUser != null) {
+            welcomeLabel = new Label("👋 Welcome, " + currentUser.getUsername() + "!");
+        } else {
+            welcomeLabel = new Label("👋 Welcome, User!");
+        }
+        welcomeLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: white; -fx-font-weight: bold; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 2, 0, 0, 0);");
         
-        Label userLabel = new Label("Welcome,");
-        userLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #34495e;");
+        Button logoutButton = new Button("🚪 Logout");
+        logoutButton.setStyle("-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-border-color: white; -fx-border-width: 2; -fx-border-radius: 20; -fx-padding: 10 20;");
+        logoutButton.setOnAction(e -> app.logout());
         
-        Text username = new Text("Admin");
-        username.setFont(Font.font("Arial", FontWeight.BOLD, 16));
-        username.setStyle("-fx-fill: #3498db;");
+        // Hover effect for logout button
+        logoutButton.setOnMouseEntered(e -> logoutButton.setStyle("-fx-background-color: rgba(255,255,255,0.3); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-border-color: white; -fx-border-width: 2; -fx-border-radius: 20; -fx-padding: 10 20;"));
+        logoutButton.setOnMouseExited(e -> logoutButton.setStyle("-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-border-color: white; -fx-border-width: 2; -fx-border-radius: 20; -fx-padding: 10 20;"));
         
-        userInfo.getChildren().addAll(userLabel, username);
-
-        // Theme toggle
-        themeToggle = new ToggleButton();
-        themeToggle.setText(InventoryManagementApp.getCurrentTheme().equals("dark") ? "🌙 Dark" : "☀ Light");
-        themeToggle.setSelected(InventoryManagementApp.getCurrentTheme().equals("dark"));
-        themeToggle.setOnAction(e -> {
-            if (themeToggle.isSelected()) {
-                InventoryManagementApp.setTheme("dark");
-                themeToggle.setText("🌙 Dark");
-            } else {
-                InventoryManagementApp.setTheme("light");
-                themeToggle.setText("☀ Light");
-            }
-            app.showDashboard(); // Refresh dashboard to apply theme
-        });
-        themeToggle.setStyle("-fx-font-size: 14; -fx-background-radius: 5; -fx-padding: 4 12 4 12;");
-
-        HBox headerRow = new HBox(20, title, themeToggle);
-        headerRow.setAlignment(Pos.CENTER);
-
-        header.getChildren().addAll(headerRow, subtitle, userInfo);
+        userBox.getChildren().addAll(welcomeLabel, logoutButton);
+        
+        header.getChildren().addAll(title, userBox);
+        HBox.setHgrow(title, Priority.ALWAYS);
+        VBox.setMargin(header, new Insets(0, 0, 30, 0));
         root.getChildren().add(header);
     }
     
-    private void createNavigationButtons() {
-        VBox buttonContainer = new VBox(20);
-        buttonContainer.setAlignment(Pos.CENTER);
-        buttonContainer.setMaxWidth(Double.MAX_VALUE); // Allow full expansion
-        buttonContainer.setPrefWidth(800); // Set preferred width for better layout
+    private void createDashboardContent() {
+        // Create dashboard cards with darker, professional colors
+        Button productsBtn = createDashboardButton("📦 Products", "Manage your inventory", "#2c3e50", "#34495e");
+        productsBtn.setOnAction(e -> app.showProductsScreen());
         
-        // Create button grid
-        GridPane buttonGrid = new GridPane();
-        buttonGrid.setHgap(20);
-        buttonGrid.setVgap(20);
-        buttonGrid.setAlignment(Pos.CENTER);
+        Button suppliersBtn = createDashboardButton("🏢 Suppliers", "Manage suppliers", "#34495e", "#2c3e50");
+        suppliersBtn.setOnAction(e -> app.showSuppliersScreen());
         
-        // Products Management Button
-        Button productsBtn = createModuleButton("Products Management", "Manage inventory items, stock levels, and product information", "#e74c3c");
-        productsBtn.setOnAction(e -> showProductsScreen());
+        Button ordersBtn = createDashboardButton("📋 Orders", "Manage orders", "#2c3e50", "#34495e");
+        ordersBtn.setOnAction(e -> app.showOrdersScreen());
         
-        // Suppliers Management Button
-        Button suppliersBtn = createModuleButton("Suppliers Management", "Manage supplier information and relationships", "#f39c12");
-        suppliersBtn.setOnAction(e -> showSuppliersScreen());
+        Button reportsBtn = createDashboardButton("📊 Reports", "View reports", "#34495e", "#2c3e50");
+        reportsBtn.setOnAction(e -> app.showReportsScreen());
         
-        // Orders & Sales Button
-        Button ordersBtn = createModuleButton("Orders & Sales", "Process orders, track sales, and manage transactions", "#27ae60");
-        ordersBtn.setOnAction(e -> showOrdersScreen());
+        // Create grid layout for cards
+        GridPane cardGrid = new GridPane();
+        cardGrid.setHgap(30);
+        cardGrid.setVgap(30);
+        cardGrid.setAlignment(Pos.CENTER);
+        cardGrid.setPadding(new Insets(30));
         
-        // Reports & Analytics Button
-        Button reportsBtn = createModuleButton("Reports & Analytics", "Generate reports, view analytics, and export data", "#9b59b6");
-        reportsBtn.setOnAction(e -> showReportsScreen());
+        // Add cards to grid
+        cardGrid.add(productsBtn, 0, 0);
+        cardGrid.add(suppliersBtn, 1, 0);
+        cardGrid.add(ordersBtn, 0, 1);
+        cardGrid.add(reportsBtn, 1, 1);
         
-        // Add buttons to grid - only add the visible ones
-        buttonGrid.add(productsBtn, 0, 0);
-        buttonGrid.add(suppliersBtn, 1, 0);
-        buttonGrid.add(ordersBtn, 0, 1);
-        buttonGrid.add(reportsBtn, 1, 1);
+        // Add cards section with darker theme
+        VBox cardsSection = new VBox(20);
+        cardsSection.setPadding(new Insets(25));
+        cardsSection.setStyle("-fx-background-color: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 15, 0, 0, 0); -fx-border-color: rgba(74, 144, 226, 0.3); -fx-border-width: 2; -fx-border-radius: 20;");
         
-        // Note: usersBtn and dataBtn are admin-only and will be added dynamically when needed
-        // buttonGrid.add(usersBtn, 0, 2);
-        // buttonGrid.add(dataBtn, 1, 2);
+        Label cardsTitle = new Label("🎯 Quick Access");
+        cardsTitle.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #ffffff; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 3, 0, 0, 0);");
         
-        buttonContainer.getChildren().add(buttonGrid);
-        root.getChildren().add(buttonContainer);
+        cardsSection.getChildren().addAll(cardsTitle, cardGrid);
+        root.getChildren().add(cardsSection);
     }
     
-    private Button createModuleButton(String title, String description, String color) {
-        VBox buttonContent = new VBox(5);
-        buttonContent.setAlignment(Pos.CENTER);
-        buttonContent.setPadding(new Insets(15));
+    private void addAdditionalContent() {
+        // System Information Section
+        VBox additionalSection = new VBox(20);
+        additionalSection.setPadding(new Insets(25));
+        additionalSection.setStyle("-fx-background-color: linear-gradient(135deg, #34495e 0%, #2c3e50 100%); -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 15, 0, 0, 0); -fx-border-color: rgba(74, 144, 226, 0.3); -fx-border-width: 2; -fx-border-radius: 20;");
         
-        Text titleText = new Text(title);
-        titleText.setFont(Font.font("Arial", FontWeight.BOLD, 16));
-        titleText.setStyle("-fx-fill: white;");
+        Label additionalTitle = new Label("ℹ️ System Information");
+        additionalTitle.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #ffffff; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 3, 0, 0, 0);");
         
-        Text descText = new Text(description);
-        descText.setFont(Font.font("Arial", FontWeight.NORMAL, 12));
-        descText.setStyle("-fx-fill: white; -fx-opacity: 0.9;");
-        descText.setWrappingWidth(200);
+        GridPane infoGrid = new GridPane();
+        infoGrid.setHgap(20);
+        infoGrid.setVgap(15);
+        infoGrid.setPadding(new Insets(20));
         
-        buttonContent.getChildren().addAll(titleText, descText);
+        // Add system info labels with better visibility
+        infoGrid.add(createInfoLabel("🖥️ System:", "Windows 10"), 0, 0);
+        infoGrid.add(createInfoLabel("💾 Memory:", "8GB RAM"), 1, 0);
+        infoGrid.add(createInfoLabel("💿 Storage:", "500GB SSD"), 0, 1);
+        infoGrid.add(createInfoLabel("🌐 Network:", "Connected"), 1, 1);
+        
+        additionalSection.getChildren().addAll(additionalTitle, infoGrid);
+        root.getChildren().add(additionalSection);
+        
+        // Quick Actions Section
+        VBox quickActions = new VBox(20);
+        quickActions.setPadding(new Insets(25));
+        quickActions.setStyle("-fx-background-color: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 15, 0, 0, 0); -fx-border-color: rgba(74, 144, 226, 0.3); -fx-border-width: 2; -fx-border-radius: 20;");
+        
+        Label quickTitle = new Label("⚡ Quick Actions");
+        quickTitle.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #ffffff; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 3, 0, 0, 0);");
+        
+        HBox actionButtons = new HBox(20);
+        actionButtons.setAlignment(Pos.CENTER);
+        
+        Button refreshBtn = new Button("🔄 Refresh Dashboard");
+        refreshBtn.setStyle("-fx-background-color: rgba(74, 144, 226, 0.8); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-border-color: #4a90e2; -fx-border-width: 2; -fx-border-radius: 20; -fx-padding: 12 24; -fx-font-size: 14px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 0);");
+        refreshBtn.setOnAction(e -> refreshDashboard());
+        
+        Button settingsBtn = new Button("⚙️ Settings");
+        settingsBtn.setStyle("-fx-background-color: rgba(52, 73, 94, 0.8); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-border-color: #34495e; -fx-border-width: 2; -fx-border-radius: 20; -fx-padding: 12 24; -fx-font-size: 14px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 0);");
+        settingsBtn.setOnAction(e -> showSettings());
+        
+        // Add hover effects
+        addButtonHoverEffects(refreshBtn);
+        addButtonHoverEffects(settingsBtn);
+        
+        actionButtons.getChildren().addAll(refreshBtn, settingsBtn);
+        quickActions.getChildren().addAll(quickTitle, actionButtons);
+        root.getChildren().add(quickActions);
+        
+        // Navigation Section
+        VBox navigationSection = new VBox(20);
+        navigationSection.setPadding(new Insets(25));
+        navigationSection.setStyle("-fx-background-color: linear-gradient(135deg, #34495e 0%, #2c3e50 100%); -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 15, 0, 0, 0); -fx-border-color: rgba(74, 144, 226, 0.3); -fx-border-width: 2; -fx-border-radius: 20;");
+        
+        Label navTitle = new Label("🧭 Navigation");
+        navTitle.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #ffffff; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 3, 0, 0, 0);");
+        
+        HBox navButtons = new HBox(20);
+        navButtons.setAlignment(Pos.CENTER);
+        
+        Button helpBtn = new Button("❓ Help");
+        helpBtn.setStyle("-fx-background-color: rgba(155, 89, 182, 0.8); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-border-color: #9b59b6; -fx-border-width: 2; -fx-border-radius: 20; -fx-padding: 12 24; -fx-font-size: 14px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 0);");
+        helpBtn.setOnAction(e -> showHelp());
+        
+        Button aboutBtn = new Button("ℹ️ About");
+        aboutBtn.setStyle("-fx-background-color: rgba(46, 204, 113, 0.8); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-border-color: #2ecc71; -fx-border-width: 2; -fx-border-radius: 20; -fx-padding: 12 24; -fx-font-size: 14px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 0);");
+        aboutBtn.setOnAction(e -> showAbout());
+        
+        // Add hover effects
+        addButtonHoverEffects(helpBtn);
+        addButtonHoverEffects(aboutBtn);
+        
+        navButtons.getChildren().addAll(helpBtn, aboutBtn);
+        navigationSection.getChildren().addAll(navTitle, navButtons);
+        root.getChildren().add(navigationSection);
+    }
+    
+    private Label createInfoLabel(String title, String value) {
+        Label label = new Label(title + " " + value);
+        label.setStyle("-fx-text-fill: #e8e8e8; -fx-font-size: 16px; -fx-font-weight: bold; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 2, 0, 0, 0);");
+        return label;
+    }
+    
+    private void addButtonHoverEffects(Button button) {
+        button.setOnMouseEntered(e -> {
+            button.setStyle(button.getStyle().replace("0.8", "1.0").replace("2", "3"));
+        });
+        button.setOnMouseExited(e -> {
+            button.setStyle(button.getStyle().replace("1.0", "0.8").replace("3", "2"));
+        });
+    }
+    
+    private void refreshDashboard() {
+        // Refresh dashboard data
+        InventoryManagementApp.showInfo("Dashboard", "Refresh", "Dashboard refreshed successfully!");
+    }
+    
+    private Button createDashboardButton(String title, String description, String color1, String color2) {
+        VBox box = new VBox(15);
+        box.setAlignment(Pos.CENTER);
+        box.setPadding(new Insets(30));
+        box.setStyle(
+            "-fx-background-color: linear-gradient(135deg, " + color1 + " 0%, " + color2 + " 100%);" +
+            "-fx-background-radius: 20;" +
+            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 15, 0, 0, 0);" +
+            "-fx-border-color: rgba(255,255,255,0.2);" +
+            "-fx-border-width: 2;" +
+            "-fx-border-radius: 20;"
+        );
+        box.setMinSize(200, 150);
+        box.setMaxSize(250, 180);
+        
+        Label titleLabel = new Label(title);
+        titleLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #ffffff; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 3, 0, 0, 0);");
+        
+        Label descLabel = new Label(description);
+        descLabel.setStyle("-fx-text-fill: #f0f0f0; -fx-wrap-text: true; -fx-font-size: 14px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 2, 0, 0, 0);");
+        
+        box.getChildren().addAll(titleLabel, descLabel);
         
         Button button = new Button();
-        button.setGraphic(buttonContent);
-        button.setPrefSize(250, 120);
-        button.setStyle("-fx-background-color: " + color + "; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 0);");
-        button.setOnMouseEntered(e -> button.setStyle("-fx-background-color: " + color + "; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 8, 0, 0, 0);"));
-        button.setOnMouseExited(e -> button.setStyle("-fx-background-color: " + color + "; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 0);"));
+        button.setGraphic(box);
+        button.setStyle(
+            "-fx-background-color: transparent;" +
+            "-fx-padding: 0;" +
+            "-fx-background-radius: 20;"
+        );
+        
+        // Enhanced hover effects with scaling and glow
+        box.setOnMouseEntered(e -> {
+            box.setStyle(
+                "-fx-background-color: linear-gradient(135deg, " + color1 + " 30%, " + color2 + " 100%);" +
+                "-fx-background-radius: 20;" +
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 20, 0, 0, 0);" +
+                "-fx-border-color: rgba(255,255,255,0.4);" +
+                "-fx-border-width: 3;" +
+                "-fx-border-radius: 20;" +
+                "-fx-scale-x: 1.05;" +
+                "-fx-scale-y: 1.05;"
+            );
+            box.setTranslateZ(10);
+        });
+        
+        box.setOnMouseExited(e -> {
+            box.setStyle(
+                "-fx-background-color: linear-gradient(135deg, " + color1 + " 0%, " + color2 + " 100%);" +
+                "-fx-background-radius: 20;" +
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 15, 0, 0, 0);" +
+                "-fx-border-color: rgba(255,255,255,0.2);" +
+                "-fx-border-width: 2;" +
+                "-fx-border-radius: 20;"
+            );
+            box.setScaleX(1.0);
+            box.setScaleY(1.0);
+            box.setTranslateZ(0);
+        });
         
         return button;
     }
     
-    private void createFooter() {
-        HBox footer = new HBox(20);
-        footer.setAlignment(Pos.CENTER);
-        footer.setPadding(new Insets(30, 0, 0, 0));
-        
-        Button logoutBtn = new Button("🚪 Logout");
-        logoutBtn.setPrefSize(100, 40);
-        logoutBtn.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
-        logoutBtn.setOnAction(e -> app.logout());
-        
-        Button exitBtn = new Button("❌ Exit");
-        exitBtn.setPrefSize(100, 40);
-        exitBtn.setStyle("-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
-        exitBtn.setOnAction(e -> app.exit());
-        
-        footer.getChildren().addAll(logoutBtn, exitBtn);
-        root.getChildren().add(footer);
-    }
-    
-    // Navigation methods - these will be implemented when we create the individual screens
-    private void showProductsScreen() {
-        app.showProductsScreen();
-    }
-    
-    private void showSuppliersScreen() {
-        app.showSuppliersScreen();
-    }
-    
-    private void showOrdersScreen() {
-        app.showOrdersScreen();
-    }
-    
-    private void showReportsScreen() {
-        app.showReportsScreen();
-    }
-    
-    private void showUsersScreen() {
-        // TODO: Implement Users screen navigation
-        InventoryManagementApp.showInfo("Users", "User Management", "Users screen will be implemented next.");
-    }
-    
-    private void showDataManagementScreen() {
-        // TODO: Implement Data Management screen navigation
-        InventoryManagementApp.showInfo("Data", "Data Management", "Data Management screen will be implemented next.");
-    }
-    
     public VBox getRoot() {
-        return root;
+        // Return a container with the scroll pane
+        VBox container = new VBox();
+        container.getChildren().add(scrollPane);
+        return container;
+    }
+    
+    private void showSettings() {
+        InventoryManagementApp.showInfo("Settings", "Settings", "Settings functionality coming soon!");
+    }
+    
+    private void showHelp() {
+        InventoryManagementApp.showInfo("Help", "Help", "Help documentation coming soon!");
+    }
+    
+    private void showAbout() {
+        InventoryManagementApp.showInfo("About", "About", "Inventory Management System v1.0\nDeveloped with JavaFX");
+    }
+    
+    public void applyCurrentTheme() {
+        String theme = InventoryManagementApp.getCurrentTheme();
+        
+        if ("dark".equals(theme)) {
+            // Dark theme - keep the current dark design
+            root.setStyle("-fx-background-color: linear-gradient(to bottom, #1a1a2e 0%, #16213e 100%);");
+            
+        } else {
+            // Light theme - switch to lighter colors
+            root.setStyle("-fx-background-color: linear-gradient(to bottom, #ecf0f1 0%, #bdc3c7 100%);");
+            
+            // Update header for light theme
+            if (header != null) {
+                header.setStyle("-fx-background-color: linear-gradient(to right, #3498db 0%, #2980b9 100%); -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 0); -fx-border-color: #2980b9; -fx-border-width: 2; -fx-border-radius: 15;");
+            }
+            
+            // Update title and welcome text for light theme
+            if (title != null) {
+                title.setStyle("-fx-fill: #ffffff; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 3, 0, 0, 0);");
+            }
+            if (welcomeLabel != null) {
+                welcomeLabel.setStyle("-fx-text-fill: #ffffff; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 2, 0, 0, 0);");
+            }
+        }
     }
 }

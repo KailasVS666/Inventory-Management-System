@@ -12,6 +12,10 @@ import com.inventory.managers.ReportManager;
 import com.inventory.managers.UserManager;
 import com.inventory.DataStore;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+
 public class InventoryManagementApp extends Application {
     
     private static InventoryManager inventoryManager;
@@ -24,72 +28,44 @@ public class InventoryManagementApp extends Application {
     private LoginScreen loginScreen;
     private DashboardScreen dashboardScreen;
     
-    private static String currentTheme = "light"; // "light" or "dark"
-    private static final String LIGHT_THEME_PATH = "light-theme.css";
-    private static final String DARK_THEME_PATH = "dark-theme.css";
+    private static String currentTheme = "light"; // Always start in light mode
 
     public static String getCurrentTheme() {
         return currentTheme;
     }
 
     public static void setTheme(String theme) {
-        if (!theme.equals(currentTheme)) {
-            currentTheme = theme;
-        }
+        currentTheme = theme;
+        // Theme will be applied by each screen when they refresh
     }
-
+    
     private void applyTheme(Scene scene) {
-        try {
-            scene.getStylesheets().clear();
-            
-            // Debug: Show what we're looking for
-            System.out.println("🔍 Looking for CSS files:");
-            System.out.println("   Light theme path: " + LIGHT_THEME_PATH);
-            System.out.println("   Dark theme path: " + DARK_THEME_PATH);
-            
-            if ("dark".equals(currentTheme)) {
-                var darkThemeResource = getClass().getResource(DARK_THEME_PATH);
-                System.out.println("   Dark theme resource: " + darkThemeResource);
-                if (darkThemeResource != null) {
-                    scene.getStylesheets().add(darkThemeResource.toExternalForm());
-                    System.out.println("✓ Dark theme applied successfully");
-                } else {
-                    System.out.println("⚠ Dark theme CSS not found, using default styling");
-                }
-            } else {
-                var lightThemeResource = getClass().getResource(LIGHT_THEME_PATH);
-                System.out.println("   Light theme resource: " + lightThemeResource);
-                if (lightThemeResource != null) {
-                    scene.getStylesheets().add(lightThemeResource.toExternalForm());
-                    System.out.println("✓ Light theme applied successfully");
-                } else {
-                    System.out.println("⚠ Light theme CSS not found, using default styling");
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("⚠ Theme application failed: " + e.getMessage() + ", using default styling");
-            e.printStackTrace();
-        }
+        // No-op: styling is now handled directly in each screen's Java code
     }
     
     @Override
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
-        
         try {
             // Initialize managers
             initializeManagers();
-            
             // Set up the primary stage
-            primaryStage.setTitle("Inventory Management System - Phase 8");
+            primaryStage.setTitle("Inventory Management System");
             primaryStage.setMinWidth(1200);
             primaryStage.setMinHeight(800);
+            primaryStage.setMaximized(true); // Always start maximized
+            
+            // Set up window state change listener
+            primaryStage.maximizedProperty().addListener((obs, wasMaximized, isMaximized) -> {
+                if (!isMaximized) {
+                    // If user manually restores down, allow it but suggest fullscreen
+                    primaryStage.setMaximized(true);
+                }
+            });
             
             // Show login screen first
             showLoginScreen();
-            
             primaryStage.show();
-            
         } catch (Exception e) {
             showError("Application Error", "Failed to start application", e.getMessage());
             e.printStackTrace();
@@ -113,21 +89,21 @@ public class InventoryManagementApp extends Application {
     }
     
     public void showLoginScreen() {
-        // Create new instance each time to avoid VBox reuse error
         loginScreen = new LoginScreen(this);
         Scene scene = new Scene(loginScreen.getRoot());
         applyTheme(scene);
         primaryStage.setScene(scene);
         primaryStage.centerOnScreen();
+        primaryStage.setMaximized(true);
     }
     
     public void showDashboard() {
-        // Create new instance each time to avoid VBox reuse error
         dashboardScreen = new DashboardScreen(this);
         Scene scene = new Scene(dashboardScreen.getRoot());
         applyTheme(scene);
         primaryStage.setScene(scene);
         primaryStage.centerOnScreen();
+        primaryStage.setMaximized(true);
     }
     
     public void showProductsScreen() {
@@ -136,6 +112,7 @@ public class InventoryManagementApp extends Application {
         applyTheme(scene);
         primaryStage.setScene(scene);
         primaryStage.centerOnScreen();
+        primaryStage.setMaximized(true);
     }
     
     public void showSuppliersScreen() {
@@ -144,6 +121,7 @@ public class InventoryManagementApp extends Application {
         applyTheme(scene);
         primaryStage.setScene(scene);
         primaryStage.centerOnScreen();
+        primaryStage.setMaximized(true);
     }
     
     public void showOrdersScreen() {
@@ -152,6 +130,7 @@ public class InventoryManagementApp extends Application {
         applyTheme(scene);
         primaryStage.setScene(scene);
         primaryStage.centerOnScreen();
+        primaryStage.setMaximized(true);
     }
     
     public Stage getPrimaryStage() {
@@ -164,6 +143,7 @@ public class InventoryManagementApp extends Application {
         applyTheme(scene);
         primaryStage.setScene(scene);
         primaryStage.centerOnScreen();
+        primaryStage.setMaximized(true);
     }
     
     public void logout() {

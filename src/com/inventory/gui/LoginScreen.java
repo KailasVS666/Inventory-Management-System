@@ -3,16 +3,20 @@ package com.inventory.gui;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import com.inventory.managers.UserManager;
+import com.inventory.models.User;
 
 public class LoginScreen {
     
     private final InventoryManagementApp app;
     private final VBox root;
+    private ScrollPane scrollPane;
     private final TextField usernameField;
     private final PasswordField passwordField;
     private final Button loginButton;
@@ -101,6 +105,21 @@ public class LoginScreen {
         
         // Set initial focus
         usernameField.requestFocus();
+        
+        // Initialize scroll pane
+        scrollPane = new ScrollPane();
+        scrollPane.setContent(root);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setPrefViewportHeight(600);
+        scrollPane.setPrefViewportWidth(800);
+        scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
+        
+        // Improve scroll pane behavior
+        scrollPane.setPannable(true);
+        scrollPane.setMinViewportHeight(400);
+        scrollPane.setMinViewportWidth(600);
     }
     
     private void handleLogin() {
@@ -113,13 +132,15 @@ public class LoginScreen {
         }
         
         try {
-            // Create a temporary scanner for authentication
-            // In a real GUI app, we'd modify the UserManager to accept direct parameters
             UserManager userManager = InventoryManagementApp.getUserManager();
             
-            // For now, we'll simulate the login process
-            // TODO: Modify UserManager to have a direct login method
-            if (authenticateUser(username, password)) {
+            // Use the UserManager's authentication method
+            User authenticatedUser = userManager.authenticateUser(username, password);
+            
+            if (authenticatedUser != null) {
+                // Set the current user in the UserManager
+                userManager.setCurrentUser(authenticatedUser);
+                
                 // Login successful
                 statusLabel.setVisible(false);
                 app.showDashboard();
@@ -135,16 +156,7 @@ public class LoginScreen {
     }
     
     private boolean authenticateUser(String username, String password) {
-        // This is a temporary authentication method
-        // TODO: Integrate with UserManager's authentication
-        UserManager userManager = InventoryManagementApp.getUserManager();
-        
-        // For now, check against default admin credentials
-        if ("admin".equals(username) && "admin123".equals(password)) {
-            return true;
-        }
-        
-        // TODO: Implement proper authentication using UserManager
+        // This method is no longer needed as we're using UserManager directly
         return false;
     }
     
@@ -154,6 +166,9 @@ public class LoginScreen {
     }
     
     public VBox getRoot() {
-        return root;
+        // Create scroll pane wrapper
+        VBox container = new VBox();
+        container.getChildren().add(scrollPane);
+        return container;
     }
 }

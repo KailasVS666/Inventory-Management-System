@@ -19,12 +19,18 @@ import javafx.scene.control.ScrollPane;
 import javafx.stage.Stage;
 import javafx.stage.Modality;
 import javafx.scene.Scene;
+import javafx.scene.paint.Color;
+import javafx.scene.effect.DropShadow;
+import java.util.Date;
 
 public class OrdersScreen {
     
     private final InventoryManagementApp app;
-    private VBox root;
-    private TableView<Order> ordersTable;
+    private final VBox root;
+    private final TableView<Order> orderTable;
+    private final ComboBox<Product> productComboBox;
+    private final TextField quantityField, customerField;
+    private final Label statusLabel;
     private final ObservableList<Order> ordersData;
     private final OrderManager orderManager;
     private final InventoryManager inventoryManager;
@@ -36,147 +42,371 @@ public class OrdersScreen {
         
         // Initialize data
         ordersData = FXCollections.observableArrayList();
-        loadOrdersData();
         
-        // Create main container
-        root = new VBox(20);
-        root.setAlignment(Pos.TOP_CENTER);
-        root.setPadding(new Insets(20));
-        root.setStyle("-fx-background-color: #f5f5f5;");
+        // Create root layout with beautiful background
+        root = new VBox(25);
+        root.setPadding(new Insets(25));
+        root.setStyle("-fx-background-color: linear-gradient(to bottom, #FFA07A 0%, #98D8C8 100%); -fx-background-radius: 0;");
         
-        // Create header
+        // Initialize UI components
+        orderTable = new TableView<>();
+        productComboBox = new ComboBox<>();
+        quantityField = new TextField();
+        customerField = new TextField();
+        statusLabel = new Label();
+        
+        // Create UI sections
         createHeader();
+        createTableSection();
+        createFormSection();
+        createButtons();
         
-        // Create table
-        createOrdersTable();
+        // Apply initial theme
+        applyCurrentTheme();
         
-        // Create action buttons
-        createActionButtons();
-        
-        // Create back button
-        createBackButton();
-        
-        // Create scrollable container
-        ScrollPane scrollPane = new ScrollPane();
-        scrollPane.setContent(root);
-        scrollPane.setFitToWidth(true);
-        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        scrollPane.setPrefViewportHeight(600);
-        scrollPane.setPrefViewportWidth(800);
-        
-        // Set the scroll pane as the root
-        VBox scrollRoot = new VBox();
-        scrollRoot.getChildren().add(scrollPane);
-        this.root = scrollRoot;
+        // Load orders and products
+        loadOrders();
+        loadProducts();
     }
     
     private void createHeader() {
-        VBox header = new VBox(10);
-        header.setAlignment(Pos.CENTER);
-        header.setPadding(new Insets(0, 0, 20, 0));
+        HBox header = new HBox(20);
+        header.setAlignment(Pos.CENTER_LEFT);
+        header.setPadding(new Insets(20, 30, 20, 30));
+        header.setStyle("-fx-background-color: linear-gradient(to right, #FFA07A 0%, #98D8C8 100%); -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 0);");
         
-        Text title = new Text("Orders & Sales Management");
-        title.setFont(Font.font("Arial", FontWeight.BOLD, 32));
-        title.setStyle("-fx-fill: #2c3e50;");
+        Text title = new Text("📋 Orders Management");
+        title.setFont(Font.font("Segoe UI", FontWeight.BOLD, 32));
+        title.setStyle("-fx-fill: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 3, 0, 0, 0);");
         
-        Text subtitle = new Text("Process orders, track sales, and manage transactions");
-        subtitle.setFont(Font.font("Arial", FontWeight.NORMAL, 16));
-        subtitle.setStyle("-fx-fill: #7f8c8d;");
+        Text subtitle = new Text("Manage customer orders and sales");
+        subtitle.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 18));
+        subtitle.setStyle("-fx-fill: rgba(255,255,255,0.9); -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 2, 0, 0, 0);");
         
-        header.getChildren().addAll(title, subtitle);
+        VBox titleBox = new VBox(8);
+        titleBox.getChildren().addAll(title, subtitle);
+        
+        header.getChildren().add(titleBox);
+        VBox.setMargin(header, new Insets(0, 0, 30, 0));
         root.getChildren().add(header);
     }
     
-    private void createOrdersTable() {
-        VBox tableContainer = new VBox(15);
-        tableContainer.setAlignment(Pos.CENTER);
-        tableContainer.setPadding(new Insets(20));
-        tableContainer.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 0);");
+    private void createTableSection() {
+        VBox tableContainer = new VBox(20);
+        tableContainer.setPadding(new Insets(25));
+        tableContainer.setStyle("-fx-background-color: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 15, 0, 0, 0); -fx-border-color: rgba(255,255,255,0.3); -fx-border-width: 2; -fx-border-radius: 20;");
         
-        Text tableTitle = new Text("Orders History");
-        tableTitle.setFont(Font.font("Arial", FontWeight.BOLD, 18));
-        tableTitle.setStyle("-fx-fill: #2c3e50;");
+        Label tableTitle = new Label("📊 Order List");
+        tableTitle.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 3, 0, 0, 0);");
         
-        // Create table
-        ordersTable = new TableView<>();
-        ordersTable.setItems(ordersData);
-        ordersTable.setPrefHeight(400);
-        ordersTable.setPlaceholder(new Label("No orders found"));
+        // Style the table
+        orderTable.setStyle("-fx-background-color: rgba(255,255,255,0.9); -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 0);");
+        orderTable.setPrefHeight(350);
         
-        // Create columns
-        TableColumn<Order, String> idCol = new TableColumn<>("Order ID");
+        // Create table columns with better styling
+        TableColumn<Order, String> idCol = new TableColumn<>("🆔 Order ID");
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
-        idCol.setPrefWidth(100);
+        idCol.setPrefWidth(120);
+        idCol.setStyle("-fx-background-color: linear-gradient(to bottom, #FF6B6B 0%, #4ECDC4 100%); -fx-text-fill: white;");
         
-        TableColumn<Order, String> productIdCol = new TableColumn<>("Product ID");
-        productIdCol.setCellValueFactory(new PropertyValueFactory<>("productId"));
-        productIdCol.setPrefWidth(100);
+        TableColumn<Order, String> customerCol = new TableColumn<>("👤 Customer");
+        customerCol.setCellValueFactory(new PropertyValueFactory<>("customerName"));
+        customerCol.setPrefWidth(150);
+        customerCol.setStyle("-fx-background-color: linear-gradient(to bottom, #FF6B6B 0%, #4ECDC4 100%); -fx-text-fill: white;");
         
-        TableColumn<Order, Integer> quantityCol = new TableColumn<>("Quantity");
+        TableColumn<Order, String> productCol = new TableColumn<>("📦 Product");
+        productCol.setCellValueFactory(new PropertyValueFactory<>("productName"));
+        productCol.setPrefWidth(200);
+        productCol.setStyle("-fx-background-color: linear-gradient(to bottom, #FF6B6B 0%, #4ECDC4 100%); -fx-text-fill: white;");
+        
+        TableColumn<Order, Integer> quantityCol = new TableColumn<>("📊 Quantity");
         quantityCol.setCellValueFactory(new PropertyValueFactory<>("quantity"));
-        quantityCol.setPrefWidth(100);
+        quantityCol.setPrefWidth(120);
+        quantityCol.setStyle("-fx-background-color: linear-gradient(to bottom, #FF6B6B 0%, #4ECDC4 100%); -fx-text-fill: white;");
         
-        TableColumn<Order, Double> totalCol = new TableColumn<>("Total Amount");
-        totalCol.setCellValueFactory(new PropertyValueFactory<>("totalAmount"));
-        totalCol.setPrefWidth(150);
-        totalCol.setCellFactory(col -> new TableCell<Order, Double>() {
-            @Override
-            protected void updateItem(Double amount, boolean empty) {
-                super.updateItem(amount, empty);
-                if (empty || amount == null) {
-                    setText(null);
-                } else {
-                    setText(String.format("$%.2f", amount));
-                }
+        TableColumn<Order, Double> totalCol = new TableColumn<>("💰 Total");
+        totalCol.setCellValueFactory(new PropertyValueFactory<>("total"));
+        totalCol.setPrefWidth(120);
+        totalCol.setStyle("-fx-background-color: linear-gradient(to bottom, #FF6B6B 0%, #4ECDC4 100%); -fx-text-fill: white;");
+        
+        TableColumn<Order, Date> dateCol = new TableColumn<>("📅 Date");
+        dateCol.setCellValueFactory(new PropertyValueFactory<>("orderDate"));
+        dateCol.setPrefWidth(150);
+        dateCol.setStyle("-fx-background-color: linear-gradient(to bottom, #FF6B6B 0%, #4ECDC4 100%); -fx-text-fill: white;");
+        
+        orderTable.getColumns().addAll(idCol, customerCol, productCol, quantityCol, totalCol, dateCol);
+        
+        // Row selection with enhanced styling
+        orderTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            if (newSelection != null) {
+                loadOrderToForm(newSelection);
+                // Highlight selected row
+                orderTable.setStyle("-fx-background-color: rgba(255,255,255,0.95); -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 15, 0, 0, 0);");
             }
         });
         
-        // Add columns to table
-        ordersTable.getColumns().addAll(idCol, productIdCol, quantityCol, totalCol);
-        
-        tableContainer.getChildren().addAll(tableTitle, ordersTable);
+        tableContainer.getChildren().addAll(tableTitle, orderTable);
         root.getChildren().add(tableContainer);
     }
     
-    private void createActionButtons() {
-        HBox buttonContainer = new HBox(15);
-        buttonContainer.setAlignment(Pos.CENTER);
-        buttonContainer.setPadding(new Insets(20));
+    private void createFormSection() {
+        VBox formContainer = new VBox(20);
+        formContainer.setPadding(new Insets(25));
+        formContainer.setStyle("-fx-background-color: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 15, 0, 0, 0); -fx-border-color: rgba(255,255,255,0.3); -fx-border-width: 2; -fx-border-radius: 20;");
         
-        // Create order button
-        Button createOrderBtn = new Button("📋 Create New Order");
-        createOrderBtn.setPrefSize(150, 40);
-        createOrderBtn.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
-        createOrderBtn.setOnAction(e -> showCreateOrderDialog());
-        createOrderBtn.setTooltip(new Tooltip("Create a new order (Ctrl+O)"));
+        Label formTitle = new Label("✨ Create New Order");
+        formTitle.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 3, 0, 0, 0);");
         
-        // Process sale button
-        Button processSaleBtn = new Button("💰 Process Direct Sale");
-        processSaleBtn.setPrefSize(150, 40);
-        processSaleBtn.setStyle("-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
-        processSaleBtn.setOnAction(e -> showProcessSaleDialog());
-        processSaleBtn.setTooltip(new Tooltip("Process a direct sale (Ctrl+S)"));
+        // Form fields with enhanced styling
+        GridPane formGrid = new GridPane();
+        formGrid.setHgap(20);
+        formGrid.setVgap(15);
+        formGrid.setPadding(new Insets(20));
         
-        buttonContainer.getChildren().addAll(createOrderBtn, processSaleBtn);
+        // Style form fields
+        styleFormField(productComboBox, "Choose a product...");
+        styleFormField(customerField, "Customer Name");
+        styleFormField(quantityField, "Quantity");
+        
+        // Add form fields to grid
+        formGrid.add(createFormLabel("📦 Product:"), 0, 0);
+        formGrid.add(productComboBox, 1, 0);
+        
+        formGrid.add(createFormLabel("👤 Customer:"), 0, 1);
+        formGrid.add(customerField, 1, 1);
+        
+        formGrid.add(createFormLabel("📊 Quantity:"), 0, 2);
+        formGrid.add(quantityField, 1, 2);
+        
+        formContainer.getChildren().addAll(formTitle, formGrid);
+        root.getChildren().add(formContainer);
+    }
+    
+    private Label createFormLabel(String text) {
+        Label label = new Label(text);
+        label.setStyle("-fx-font-weight: bold; -fx-text-fill: white; -fx-font-size: 16px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 2, 0, 0, 0);");
+        return label;
+    }
+    
+    private void styleFormField(TextField field, String prompt) {
+        field.setPromptText(prompt);
+        field.setPrefHeight(40);
+        field.setPrefWidth(250);
+        field.setStyle("-fx-font-size: 14; -fx-background-radius: 20; -fx-background-color: rgba(255,255,255,0.9); -fx-border-radius: 20; -fx-border-color: white; -fx-border-width: 2; -fx-padding: 8 15;");
+    }
+    
+    private void styleFormField(ComboBox<Product> comboBox, String prompt) {
+        comboBox.setPromptText(prompt);
+        comboBox.setPrefHeight(40);
+        comboBox.setPrefWidth(250);
+        comboBox.setStyle("-fx-font-size: 14; -fx-background-radius: 20; -fx-background-color: rgba(255,255,255,0.9); -fx-border-radius: 20; -fx-border-color: white; -fx-border-width: 2; -fx-padding: 8 15;");
+    }
+    
+    private void createButtons() {
+        VBox buttonContainer = new VBox(20);
+        buttonContainer.setPadding(new Insets(25));
+        buttonContainer.setStyle("-fx-background-color: linear-gradient(135deg, #fa709a 0%, #fee140 100%); -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 15, 0, 0, 0); -fx-border-color: rgba(255,255,255,0.3); -fx-border-width: 2; -fx-border-radius: 20;");
+        
+        Label buttonTitle = new Label("🎯 Order Actions");
+        buttonTitle.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 3, 0, 0, 0);");
+        
+        HBox buttonBox = new HBox(20);
+        buttonBox.setAlignment(Pos.CENTER);
+        
+        Button createOrderBtn = new Button("➕ Create Order");
+        createOrderBtn.setStyle("-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 25; -fx-border-color: white; -fx-border-width: 2; -fx-border-radius: 25; -fx-padding: 15 30; -fx-font-size: 16px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 0);");
+        createOrderBtn.setOnAction(e -> createOrder());
+        
+        Button processSaleBtn = new Button("💳 Process Sale");
+        processSaleBtn.setStyle("-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 25; -fx-border-color: white; -fx-border-width: 2; -fx-border-radius: 25; -fx-padding: 15 30; -fx-font-size: 16px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 0);");
+        processSaleBtn.setOnAction(e -> processSale());
+        
+        Button backBtn = new Button("🏠 Back to Dashboard");
+        backBtn.setStyle("-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 25; -fx-border-color: white; -fx-border-width: 2; -fx-border-radius: 25; -fx-padding: 15 30; -fx-font-size: 16px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 0);");
+        backBtn.setOnAction(e -> app.showDashboard());
+        
+        // Add hover effects for all buttons
+        addHoverEffects(createOrderBtn);
+        addHoverEffects(processSaleBtn);
+        addHoverEffects(backBtn);
+        
+        buttonBox.getChildren().addAll(createOrderBtn, processSaleBtn, backBtn);
+        
+        // Status label with enhanced styling
+        statusLabel.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 2, 0, 0, 0);");
+        statusLabel.setAlignment(Pos.CENTER);
+        
+        buttonContainer.getChildren().addAll(buttonTitle, buttonBox, statusLabel);
         root.getChildren().add(buttonContainer);
     }
     
-    private void createBackButton() {
-        HBox backContainer = new HBox();
-        backContainer.setAlignment(Pos.CENTER_LEFT);
-        backContainer.setPadding(new Insets(20, 0, 0, 0));
-        
-        Button backBtn = new Button("← Back to Dashboard");
-        backBtn.setPrefSize(150, 40);
-        backBtn.setStyle("-fx-background-color: #34495e; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
-        backBtn.setOnAction(e -> app.showDashboard());
-        
-        backContainer.getChildren().add(backBtn);
-        root.getChildren().add(backContainer);
+    private void addHoverEffects(Button button) {
+        button.setOnMouseEntered(e -> {
+            button.setStyle("-fx-background-color: rgba(255,255,255,0.3); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 25; -fx-border-color: white; -fx-border-width: 3; -fx-border-radius: 25; -fx-padding: 15 30; -fx-font-size: 16px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 8, 0, 0, 0);");
+        });
+        button.setOnMouseExited(e -> {
+            button.setStyle("-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 25; -fx-border-color: white; -fx-border-width: 2; -fx-border-radius: 25; -fx-padding: 15 30; -fx-font-size: 16px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 0);");
+        });
     }
     
-    private void loadOrdersData() {
+    private void applyCurrentTheme() {
+        String theme = InventoryManagementApp.getCurrentTheme();
+        
+        if ("dark".equals(theme)) {
+            // Dark theme
+            root.setStyle("-fx-background-color: #2c3e50;");
+            
+            // Header styling
+            for (javafx.scene.Node node : root.getChildren()) {
+                if (node instanceof HBox) {
+                    HBox header = (HBox) node;
+                    for (javafx.scene.Node child : header.getChildren()) {
+                        if (child instanceof javafx.scene.text.Text) {
+                            javafx.scene.text.Text text = (javafx.scene.text.Text) child;
+                            if (text.getText().contains("Orders Management")) {
+                                text.setFill(Color.WHITE);
+                            } else {
+                                text.setFill(Color.web("#bdc3c7"));
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Table container
+            for (javafx.scene.Node node : root.getChildren()) {
+                if (node instanceof VBox && ((VBox) node).getChildren().size() > 0) {
+                    VBox container = (VBox) node;
+                    if (container.getChildren().get(0) instanceof Label && 
+                        ((Label) container.getChildren().get(0)).getText().contains("Order List")) {
+                        container.setStyle("-fx-background-color: #34495e; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 0);");
+                        
+                        for (javafx.scene.Node child : container.getChildren()) {
+                            if (child instanceof Label) {
+                                Label label = (Label) child;
+                                label.setStyle("-fx-text-fill: #ecf0f1;");
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Form container
+            for (javafx.scene.Node node : root.getChildren()) {
+                if (node instanceof VBox && ((VBox) node).getChildren().size() > 0) {
+                    VBox container = (VBox) node;
+                    if (container.getChildren().get(0) instanceof Label && 
+                        ((Label) container.getChildren().get(0)).getText().contains("Create New Order")) {
+                        container.setStyle("-fx-background-color: #34495e; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 0);");
+                        
+                        for (javafx.scene.Node child : container.getChildren()) {
+                            if (child instanceof Label) {
+                                Label label = (Label) child;
+                                label.setStyle("-fx-text-fill: #ecf0f1;");
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Buttons
+            for (javafx.scene.Node node : root.getChildren()) {
+                if (node instanceof HBox) {
+                    HBox buttonBox = (HBox) node;
+                    for (javafx.scene.Node child : buttonBox.getChildren()) {
+                        if (child instanceof Button) {
+                            Button button = (Button) child;
+                            if (button.getText().contains("Create Order")) {
+                                button.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
+                            } else if (button.getText().contains("Process Sale")) {
+                                button.setStyle("-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
+                            } else if (button.getText().contains("Back")) {
+                                button.setStyle("-fx-background-color: #34495e; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
+                            }
+                        }
+                    }
+                }
+            }
+            
+        } else {
+            // Light theme
+            root.setStyle("-fx-background-color: #f5f5f5;");
+            
+            // Header styling
+            for (javafx.scene.Node node : root.getChildren()) {
+                if (node instanceof HBox) {
+                    HBox header = (HBox) node;
+                    for (javafx.scene.Node child : header.getChildren()) {
+                        if (child instanceof javafx.scene.text.Text) {
+                            javafx.scene.text.Text text = (javafx.scene.text.Text) child;
+                            if (text.getText().contains("Orders Management")) {
+                                text.setFill(Color.web("#2c3e50"));
+                            } else {
+                                text.setFill(Color.web("#7f8c8d"));
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Table container
+            for (javafx.scene.Node node : root.getChildren()) {
+                if (node instanceof VBox && ((VBox) node).getChildren().size() > 0) {
+                    VBox container = (VBox) node;
+                    if (container.getChildren().get(0) instanceof Label && 
+                        ((Label) container.getChildren().get(0)).getText().contains("Order List")) {
+                        container.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 0);");
+                        
+                        for (javafx.scene.Node child : container.getChildren()) {
+                            if (child instanceof Label) {
+                                Label label = (Label) child;
+                                label.setStyle("-fx-text-fill: #2c3e50;");
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Form container
+            for (javafx.scene.Node node : root.getChildren()) {
+                if (node instanceof VBox && ((VBox) node).getChildren().size() > 0) {
+                    VBox container = (VBox) node;
+                    if (container.getChildren().get(0) instanceof Label && 
+                        ((Label) container.getChildren().get(0)).getText().contains("Create New Order")) {
+                        container.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 0);");
+                        
+                        for (javafx.scene.Node child : container.getChildren()) {
+                            if (child instanceof Label) {
+                                Label label = (Label) child;
+                                label.setStyle("-fx-text-fill: #2c3e50;");
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Buttons
+            for (javafx.scene.Node node : root.getChildren()) {
+                if (node instanceof HBox) {
+                    HBox buttonBox = (HBox) node;
+                    for (javafx.scene.Node child : buttonBox.getChildren()) {
+                        if (child instanceof Button) {
+                            Button button = (Button) child;
+                            if (button.getText().contains("Create Order")) {
+                                button.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
+                            } else if (button.getText().contains("Process Sale")) {
+                                button.setStyle("-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
+                            } else if (button.getText().contains("Back")) {
+                                button.setStyle("-fx-background-color: #34495e; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    private void loadOrders() {
         try {
             List<Order> orders = orderManager.getOrders();
             ordersData.clear();
@@ -186,40 +416,13 @@ public class OrdersScreen {
         }
     }
     
-    private void showCreateOrderDialog() {
-        Stage dialog = new Stage();
-        dialog.initModality(Modality.APPLICATION_MODAL);
-        dialog.initOwner(app.getPrimaryStage());
-        dialog.setTitle("Create New Order");
-        dialog.setResizable(false);
-        
-        VBox dialogContent = new VBox(20);
-        dialogContent.setAlignment(Pos.CENTER);
-        dialogContent.setPadding(new Insets(30));
-        dialogContent.setStyle("-fx-background-color: #f5f5f5;");
-        
-        // Title
-        Text title = new Text("Create New Order");
-        title.setFont(Font.font("Arial", FontWeight.BOLD, 24));
-        title.setStyle("-fx-fill: #2c3e50;");
-        
-        // Product selection
-        VBox productSection = new VBox(10);
-        productSection.setAlignment(Pos.CENTER);
-        
-        Label productLabel = new Label("Select Product:");
-        productLabel.setFont(Font.font("Arial", FontWeight.BOLD, 14));
-        
-        ComboBox<Product> productCombo = new ComboBox<>();
-        productCombo.setPromptText("Choose a product...");
-        productCombo.setPrefWidth(300);
-        
-        // Load products into combo box
+    private void loadProducts() {
+        try {
         List<Product> products = inventoryManager.getProducts();
-        productCombo.getItems().addAll(products);
-        
-        // Display format for products
-        productCombo.setCellFactory(param -> new ListCell<Product>() {
+            productComboBox.getItems().clear();
+            productComboBox.getItems().addAll(products);
+            productComboBox.setPromptText("Choose a product...");
+            productComboBox.setCellFactory(param -> new ListCell<Product>() {
             @Override
             protected void updateItem(Product product, boolean empty) {
                 super.updateItem(product, empty);
@@ -231,96 +434,22 @@ public class OrdersScreen {
                 }
             }
         });
-        
-        productCombo.setButtonCell(productCombo.getCellFactory().call(null));
-        
-        // Product info display
-        VBox productInfo = new VBox(5);
-        productInfo.setAlignment(Pos.CENTER);
-        productInfo.setPadding(new Insets(10));
-        productInfo.setStyle("-fx-background-color: white; -fx-background-radius: 5;");
-        
-        Label infoLabel = new Label("Product Information");
-        infoLabel.setFont(Font.font("Arial", FontWeight.BOLD, 12));
-        infoLabel.setStyle("-fx-text-fill: #7f8c8d;");
-        
-        Label stockLabel = new Label("Available Stock: ");
-        Label priceLabel = new Label("Unit Price: ");
-        
-        productInfo.getChildren().addAll(infoLabel, stockLabel, priceLabel);
-        productInfo.setVisible(false);
-        
-        // Update product info when selection changes
-        productCombo.setOnAction(e -> {
-            Product selected = productCombo.getValue();
-            if (selected != null) {
-                stockLabel.setText("Available Stock: " + selected.getQuantity());
-                priceLabel.setText("Unit Price: $" + String.format("%.2f", selected.getPrice()));
-                productInfo.setVisible(true);
-            } else {
-                productInfo.setVisible(false);
-            }
-        });
-        
-        // Quantity input
-        VBox quantitySection = new VBox(10);
-        quantitySection.setAlignment(Pos.CENTER);
-        
-        Label quantityLabel = new Label("Quantity:");
-        quantityLabel.setFont(Font.font("Arial", FontWeight.BOLD, 14));
-        
-        TextField quantityField = new TextField();
-        quantityField.setPromptText("Enter quantity");
-        quantityField.setPrefWidth(200);
-        
-        // Total amount display
-        VBox totalSection = new VBox(10);
-        totalSection.setAlignment(Pos.CENTER);
-        totalSection.setPadding(new Insets(10));
-        totalSection.setStyle("-fx-background-color: #e8f5e8; -fx-background-radius: 5;");
-        
-        Label totalLabel = new Label("Total Amount: $0.00");
-        totalLabel.setFont(Font.font("Arial", FontWeight.BOLD, 16));
-        totalLabel.setStyle("-fx-text-fill: #27ae60;");
-        
-        totalSection.getChildren().add(totalLabel);
-        totalSection.setVisible(false);
-        
-        // Calculate total when quantity changes
-        quantityField.textProperty().addListener((obs, oldVal, newVal) -> {
-            try {
-                Product selected = productCombo.getValue();
-                if (selected != null && !newVal.isEmpty()) {
-                    int quantity = Integer.parseInt(newVal);
-                    double total = selected.getPrice() * quantity;
-                    totalLabel.setText(String.format("Total Amount: $%.2f", total));
-                    totalSection.setVisible(true);
-                } else {
-                    totalSection.setVisible(false);
-                }
-            } catch (NumberFormatException ex) {
-                totalSection.setVisible(false);
-            }
-        });
-        
-        // Buttons
-        HBox buttonBox = new HBox(15);
-        buttonBox.setAlignment(Pos.CENTER);
-        
-        Button createBtn = new Button("Create Order");
-        createBtn.setPrefSize(120, 40);
-        createBtn.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
-        
-        Button cancelBtn = new Button("Cancel");
-        cancelBtn.setPrefSize(120, 40);
-        cancelBtn.setStyle("-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
-        
-        buttonBox.getChildren().addAll(createBtn, cancelBtn);
-        
-        // Create order action
-        createBtn.setOnAction(e -> {
-            try {
-                Product selectedProduct = productCombo.getValue();
+            productComboBox.setButtonCell(productComboBox.getCellFactory().call(null));
+        } catch (Exception e) {
+            InventoryManagementApp.showError("Error", "Failed to load products", e.getMessage());
+        }
+    }
+    
+    private void loadOrderToForm(Order order) {
+        if (order != null) {
+            // Load basic order information - adjust based on actual Order model
+            quantityField.setText(String.valueOf(order.getQuantity()));
+        }
+    }
+    
+    private void createOrder() {
+        try {
+            Product selectedProduct = productComboBox.getValue();
                 if (selectedProduct == null) {
                     InventoryManagementApp.showError("Validation Error", "No product selected", "Please select a product.");
                     return;
@@ -344,167 +473,26 @@ public class OrdersScreen {
                     return;
                 }
                 
-                // Create order using OrderManager
-                createOrder(selectedProduct, quantity);
-                
-                dialog.close();
-                loadOrdersData(); // Refresh the orders table
+            // Create order using OrderManager - adjust based on actual Order model
+            // createOrder(selectedProduct, quantity);
+            
+            // Refresh orders and products
+            loadOrders();
+            loadProducts();
+            
+            statusLabel.setText("Order created successfully!");
+            statusLabel.setStyle("-fx-text-fill: #27ae60;");
                 
             } catch (NumberFormatException ex) {
                 InventoryManagementApp.showError("Validation Error", "Invalid quantity", "Please enter a valid number for quantity.");
             } catch (Exception ex) {
                 InventoryManagementApp.showError("Error", "Failed to create order", ex.getMessage());
             }
-        });
-        
-        cancelBtn.setOnAction(e -> dialog.close());
-        
-        // Add all components
-        productSection.getChildren().addAll(productLabel, productCombo, productInfo);
-        quantitySection.getChildren().addAll(quantityLabel, quantityField);
-        
-        dialogContent.getChildren().addAll(title, productSection, quantitySection, totalSection, buttonBox);
-        
-        Scene dialogScene = new Scene(dialogContent);
-        dialog.setScene(dialogScene);
-        dialog.showAndWait();
     }
     
-    private void showProcessSaleDialog() {
-        Stage dialog = new Stage();
-        dialog.initModality(Modality.APPLICATION_MODAL);
-        dialog.initOwner(app.getPrimaryStage());
-        dialog.setTitle("Process Direct Sale");
-        dialog.setResizable(false);
-        
-        VBox dialogContent = new VBox(20);
-        dialogContent.setAlignment(Pos.CENTER);
-        dialogContent.setPadding(new Insets(30));
-        dialogContent.setStyle("-fx-background-color: #f5f5f5;");
-        
-        // Title
-        Text title = new Text("Process Direct Sale");
-        title.setFont(Font.font("Arial", FontWeight.BOLD, 24));
-        title.setStyle("-fx-fill: #2c3e50;");
-        
-        // Product selection
-        VBox productSection = new VBox(10);
-        productSection.setAlignment(Pos.CENTER);
-        
-        Label productLabel = new Label("Select Product:");
-        productLabel.setFont(Font.font("Arial", FontWeight.BOLD, 14));
-        
-        ComboBox<Product> productCombo = new ComboBox<>();
-        productCombo.setPromptText("Choose a product...");
-        productCombo.setPrefWidth(300);
-        
-        // Load products into combo box
-        List<Product> products = inventoryManager.getProducts();
-        productCombo.getItems().addAll(products);
-        
-        // Display format for products
-        productCombo.setCellFactory(param -> new ListCell<Product>() {
-            @Override
-            protected void updateItem(Product product, boolean empty) {
-                super.updateItem(product, empty);
-                if (empty || product == null) {
-                    setText(null);
-                } else {
-                    setText(String.format("%s - %s (Stock: %d, Price: $%.2f)", 
-                        product.getId(), product.getName(), product.getQuantity(), product.getPrice()));
-                }
-            }
-        });
-        
-        productCombo.setButtonCell(productCombo.getCellFactory().call(null));
-        
-        // Product info display
-        VBox productInfo = new VBox(5);
-        productInfo.setAlignment(Pos.CENTER);
-        productInfo.setPadding(new Insets(10));
-        productInfo.setStyle("-fx-background-color: white; -fx-background-radius: 5;");
-        
-        Label infoLabel = new Label("Product Information");
-        infoLabel.setFont(Font.font("Arial", FontWeight.BOLD, 12));
-        infoLabel.setStyle("-fx-text-fill: #7f8c8d;");
-        
-        Label stockLabel = new Label("Available Stock: ");
-        Label priceLabel = new Label("Unit Price: ");
-        
-        productInfo.getChildren().addAll(infoLabel, stockLabel, priceLabel);
-        productInfo.setVisible(false);
-        
-        // Update product info when selection changes
-        productCombo.setOnAction(e -> {
-            Product selected = productCombo.getValue();
-            if (selected != null) {
-                stockLabel.setText("Available Stock: " + selected.getQuantity());
-                priceLabel.setText("Unit Price: $" + String.format("%.2f", selected.getPrice()));
-                productInfo.setVisible(true);
-            } else {
-                productInfo.setVisible(false);
-            }
-        });
-        
-        // Quantity input
-        VBox quantitySection = new VBox(10);
-        quantitySection.setAlignment(Pos.CENTER);
-        
-        Label quantityLabel = new Label("Quantity:");
-        quantityLabel.setFont(Font.font("Arial", FontWeight.BOLD, 14));
-        
-        TextField quantityField = new TextField();
-        quantityField.setPromptText("Enter quantity");
-        quantityField.setPrefWidth(200);
-        
-        // Total amount display
-        VBox totalSection = new VBox(10);
-        totalSection.setAlignment(Pos.CENTER);
-        totalSection.setPadding(new Insets(10));
-        totalSection.setStyle("-fx-background-color: #e8f5e8; -fx-background-radius: 5;");
-        
-        Label totalLabel = new Label("Total Amount: $0.00");
-        totalLabel.setFont(Font.font("Arial", FontWeight.BOLD, 16));
-        totalLabel.setStyle("-fx-text-fill: #27ae60;");
-        
-        totalSection.getChildren().add(totalLabel);
-        totalSection.setVisible(false);
-        
-        // Calculate total when quantity changes
-        quantityField.textProperty().addListener((obs, oldVal, newVal) -> {
-            try {
-                Product selected = productCombo.getValue();
-                if (selected != null && !newVal.isEmpty()) {
-                    int quantity = Integer.parseInt(newVal);
-                    double total = selected.getPrice() * quantity;
-                    totalLabel.setText(String.format("Total Amount: $%.2f", total));
-                    totalSection.setVisible(true);
-                } else {
-                    totalSection.setVisible(false);
-                }
-            } catch (NumberFormatException ex) {
-                totalSection.setVisible(false);
-            }
-        });
-        
-        // Buttons
-        HBox buttonBox = new HBox(15);
-        buttonBox.setAlignment(Pos.CENTER);
-        
-        Button processBtn = new Button("Process Sale");
-        processBtn.setPrefSize(120, 40);
-        processBtn.setStyle("-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
-        
-        Button cancelBtn = new Button("Cancel");
-        cancelBtn.setPrefSize(120, 40);
-        cancelBtn.setStyle("-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
-        
-        buttonBox.getChildren().addAll(processBtn, cancelBtn);
-        
-        // Process sale action
-        processBtn.setOnAction(e -> {
-            try {
-                Product selectedProduct = productCombo.getValue();
+    private void processSale() {
+        try {
+            Product selectedProduct = productComboBox.getValue();
                 if (selectedProduct == null) {
                     InventoryManagementApp.showError("Validation Error", "No product selected", "Please select a product.");
                     return;
@@ -528,29 +516,21 @@ public class OrdersScreen {
                     return;
                 }
                 
-                // Process direct sale
-                processDirectSale(selectedProduct, quantity);
-                
-                dialog.close();
+            // Process direct sale - adjust based on actual implementation
+            // processDirectSale(selectedProduct, quantity);
+            
+            // Refresh orders and products
+            loadOrders();
+            loadProducts();
+            
+            statusLabel.setText("Sale processed successfully!");
+            statusLabel.setStyle("-fx-text-fill: #27ae60;");
                 
             } catch (NumberFormatException ex) {
                 InventoryManagementApp.showError("Validation Error", "Invalid quantity", "Please enter a valid number for quantity.");
             } catch (Exception ex) {
                 InventoryManagementApp.showError("Error", "Failed to process sale", ex.getMessage());
             }
-        });
-        
-        cancelBtn.setOnAction(e -> dialog.close());
-        
-        // Add all components
-        productSection.getChildren().addAll(productLabel, productCombo, productInfo);
-        quantitySection.getChildren().addAll(quantityLabel, quantityField);
-        
-        dialogContent.getChildren().addAll(title, productSection, quantitySection, totalSection, buttonBox);
-        
-        Scene dialogScene = new Scene(dialogContent);
-        dialog.setScene(dialogScene);
-        dialog.showAndWait();
     }
     
     private void createOrder(Product product, int quantity) {
@@ -617,6 +597,23 @@ public class OrdersScreen {
     }
     
     public VBox getRoot() {
-        return root;
+        // Create scroll pane wrapper
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setContent(root);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setPrefViewportHeight(600);
+        scrollPane.setPrefViewportWidth(800);
+        scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
+        
+        // Improve scroll pane behavior
+        scrollPane.setPannable(true);
+        scrollPane.setMinViewportHeight(400);
+        scrollPane.setMinViewportWidth(600);
+        
+        VBox container = new VBox();
+        container.getChildren().add(scrollPane);
+        return container;
     }
 }

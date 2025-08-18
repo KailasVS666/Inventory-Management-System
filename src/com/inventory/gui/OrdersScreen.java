@@ -259,155 +259,52 @@ public class OrdersScreen {
     
     private void applyCurrentTheme() {
         String theme = InventoryManagementApp.getCurrentTheme();
-        
-        if ("dark".equals(theme)) {
-            // Dark theme
-            root.setStyle("-fx-background-color: #2c3e50;");
-            
-            // Header styling
-            for (javafx.scene.Node node : root.getChildren()) {
-                if (node instanceof HBox) {
-                    HBox header = (HBox) node;
-                    for (javafx.scene.Node child : header.getChildren()) {
-                        if (child instanceof javafx.scene.text.Text) {
-                            javafx.scene.text.Text text = (javafx.scene.text.Text) child;
-                            if (text.getText().contains("Orders Management")) {
-                                text.setFill(Color.WHITE);
-                            } else {
-                                text.setFill(Color.web("#bdc3c7"));
-                            }
+        boolean isDark = "dark".equals(theme);
+        String bg = isDark ? "#10142b" : "#f5f7fa";
+        String card = isDark ? "#22304a" : "#eaf6fb";
+        String header = isDark ? "#34495e" : "#4a90e2";
+        String accent = isDark ? "#4a90e2" : "#2980b9";
+        String btnPrimary = isDark ? "#2980b9" : "#3498db";
+        String btnSuccess = "#27ae60";
+        String btnDanger = "#e74c3c";
+        String text = isDark ? "#ecf0f1" : "#22304a";
+        String textHeader = "#ffffff";
+
+        root.setStyle("-fx-background-color: " + bg + ";");
+
+        if (root.getChildren().size() > 0 && root.getChildren().get(0) instanceof HBox) {
+            HBox headerBox = (HBox) root.getChildren().get(0);
+            headerBox.setStyle("-fx-background-color: " + header + "; -fx-background-radius: 15;");
+            for (javafx.scene.Node node : headerBox.getChildren()) {
+                if (node instanceof VBox) {
+                    VBox innerVBox = (VBox) node;
+                    for (javafx.scene.Node innerNode : innerVBox.getChildren()) {
+                        if (innerNode instanceof Label || innerNode instanceof Text) {
+                            innerNode.setStyle("-fx-text-fill: " + textHeader + ";");
                         }
                     }
                 }
             }
-            
-            // Table container
-            for (javafx.scene.Node node : root.getChildren()) {
-                if (node instanceof VBox && ((VBox) node).getChildren().size() > 0) {
-                    VBox container = (VBox) node;
-                    if (container.getChildren().get(0) instanceof Label && 
-                        ((Label) container.getChildren().get(0)).getText().contains("Order List")) {
-                        container.setStyle("-fx-background-color: #34495e; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 0);");
-                        
-                        for (javafx.scene.Node child : container.getChildren()) {
-                            if (child instanceof Label) {
-                                Label label = (Label) child;
-                                label.setStyle("-fx-text-fill: #ecf0f1;");
-                            }
-                        }
+        }
+
+        for (javafx.scene.Node node : root.getChildren()) {
+            if (node instanceof VBox) {
+                VBox vbox = (VBox) node;
+                vbox.setStyle("-fx-background-color: " + card + "; -fx-background-radius: 20;");
+                for (javafx.scene.Node child : vbox.getChildren()) {
+                    if (child instanceof Label) {
+                        child.setStyle("-fx-text-fill: " + text + ";");
                     }
-                }
-            }
-            
-            // Form container
-            for (javafx.scene.Node node : root.getChildren()) {
-                if (node instanceof VBox && ((VBox) node).getChildren().size() > 0) {
-                    VBox container = (VBox) node;
-                    if (container.getChildren().get(0) instanceof Label && 
-                        ((Label) container.getChildren().get(0)).getText().contains("Create New Order")) {
-                        container.setStyle("-fx-background-color: #34495e; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 0);");
-                        
-                        for (javafx.scene.Node child : container.getChildren()) {
-                            if (child instanceof Label) {
-                                Label label = (Label) child;
-                                label.setStyle("-fx-text-fill: #ecf0f1;");
-                            }
-                        }
+                    if (child instanceof TableView) {
+                        child.setStyle("-fx-background-color: " + card + ";");
                     }
-                }
-            }
-            
-            // Buttons
-            for (javafx.scene.Node node : root.getChildren()) {
-                if (node instanceof HBox) {
-                    HBox buttonBox = (HBox) node;
-                    for (javafx.scene.Node child : buttonBox.getChildren()) {
-                        if (child instanceof Button) {
-                            Button button = (Button) child;
-                            if (button.getText().contains("Create Order")) {
-                                button.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
-                            } else if (button.getText().contains("Process Sale")) {
-                                button.setStyle("-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
-                            } else if (button.getText().contains("Back")) {
-                                button.setStyle("-fx-background-color: #34495e; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
-                            }
-                        }
-                    }
-                }
-            }
-            
-        } else {
-            // Light theme
-            root.setStyle("-fx-background-color: #f5f5f5;");
-            
-            // Header styling
-            for (javafx.scene.Node node : root.getChildren()) {
-                if (node instanceof HBox) {
-                    HBox header = (HBox) node;
-                    for (javafx.scene.Node child : header.getChildren()) {
-                        if (child instanceof javafx.scene.text.Text) {
-                            javafx.scene.text.Text text = (javafx.scene.text.Text) child;
-                            if (text.getText().contains("Orders Management")) {
-                                text.setFill(Color.web("#2c3e50"));
-                            } else {
-                                text.setFill(Color.web("#7f8c8d"));
-                            }
-                        }
-                    }
-                }
-            }
-            
-            // Table container
-            for (javafx.scene.Node node : root.getChildren()) {
-                if (node instanceof VBox && ((VBox) node).getChildren().size() > 0) {
-                    VBox container = (VBox) node;
-                    if (container.getChildren().get(0) instanceof Label && 
-                        ((Label) container.getChildren().get(0)).getText().contains("Order List")) {
-                        container.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 0);");
-                        
-                        for (javafx.scene.Node child : container.getChildren()) {
-                            if (child instanceof Label) {
-                                Label label = (Label) child;
-                                label.setStyle("-fx-text-fill: #2c3e50;");
-                            }
-                        }
-                    }
-                }
-            }
-            
-            // Form container
-            for (javafx.scene.Node node : root.getChildren()) {
-                if (node instanceof VBox && ((VBox) node).getChildren().size() > 0) {
-                    VBox container = (VBox) node;
-                    if (container.getChildren().get(0) instanceof Label && 
-                        ((Label) container.getChildren().get(0)).getText().contains("Create New Order")) {
-                        container.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 0);");
-                        
-                        for (javafx.scene.Node child : container.getChildren()) {
-                            if (child instanceof Label) {
-                                Label label = (Label) child;
-                                label.setStyle("-fx-text-fill: #2c3e50;");
-                            }
-                        }
-                    }
-                }
-            }
-            
-            // Buttons
-            for (javafx.scene.Node node : root.getChildren()) {
-                if (node instanceof HBox) {
-                    HBox buttonBox = (HBox) node;
-                    for (javafx.scene.Node child : buttonBox.getChildren()) {
-                        if (child instanceof Button) {
-                            Button button = (Button) child;
-                            if (button.getText().contains("Create Order")) {
-                                button.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
-                            } else if (button.getText().contains("Process Sale")) {
-                                button.setStyle("-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
-                            } else if (button.getText().contains("Back")) {
-                                button.setStyle("-fx-background-color: #34495e; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
-                            }
-                        }
+                    if (child instanceof Button) {
+                        Button btn = (Button) child;
+                        String btnColor = btn.getText().contains("Add") ? btnSuccess :
+                                          btn.getText().contains("Update") ? btnPrimary :
+                                          btn.getText().contains("Delete") ? btnDanger :
+                                          btnPrimary;
+                        btn.setStyle("-fx-background-color: " + btnColor + "; -fx-text-fill: " + textHeader + ";");
                     }
                 }
             }

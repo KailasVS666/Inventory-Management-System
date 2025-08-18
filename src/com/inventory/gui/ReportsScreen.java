@@ -362,14 +362,11 @@ public class ReportsScreen {
     
     public void applyCurrentTheme() {
         String theme = InventoryManagementApp.getCurrentTheme();
-        
         if ("dark".equals(theme)) {
-            // Dark theme - keep vibrant colors but adjust for dark mode
-            root.setStyle("-fx-background-color: linear-gradient(to bottom, #2c3e50 0%, #34495e 100%);");
-            
+            root.setStyle("-fx-background-color: #10142b;");
         } else {
-            // Light theme - keep the vibrant colorful design
-            root.setStyle("-fx-background-color: linear-gradient(to bottom, #DDA0DD 0%, #F7DC6F 100%);");
+            root.setStyle("-fx-background-color: #ffffff;");
         }
+        // ...existing code for other theme elements...
     }
 }

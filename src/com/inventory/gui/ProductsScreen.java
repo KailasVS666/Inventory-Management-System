@@ -322,18 +322,55 @@ public class ProductsScreen {
     
     private void applyCurrentTheme() {
         String theme = InventoryManagementApp.getCurrentTheme();
-        
-        if ("dark".equals(theme)) {
-            // Dark theme - keep the current dark design
-            root.setStyle("-fx-background-color: linear-gradient(to bottom, #1a1a2e 0%, #16213e 100%);");
-            
-        } else {
-            // Light theme - switch to lighter colors
-            root.setStyle("-fx-background-color: linear-gradient(to bottom, #ecf0f1 0%, #bdc3c7 100%);");
-            
-            // Update header for light theme
-            // Note: This would require more complex theme switching logic
-            // For now, we'll keep the dark theme as default
+        boolean isDark = "dark".equals(theme);
+        String bg = isDark ? "#10142b" : "#f5f7fa";
+        String card = isDark ? "#22304a" : "#eaf6fb";
+        String header = isDark ? "#34495e" : "#4a90e2";
+        String accent = isDark ? "#4a90e2" : "#2980b9";
+        String btnPrimary = isDark ? "#2980b9" : "#3498db";
+        String btnSuccess = "#27ae60";
+        String btnDanger = "#e74c3c";
+        String text = isDark ? "#ecf0f1" : "#22304a";
+        String textHeader = "#ffffff";
+
+        root.setStyle("-fx-background-color: " + bg + ";");
+
+        if (root.getChildren().size() > 0 && root.getChildren().get(0) instanceof HBox) {
+            HBox headerBox = (HBox) root.getChildren().get(0);
+            headerBox.setStyle("-fx-background-color: " + header + "; -fx-background-radius: 15;");
+            for (javafx.scene.Node node : headerBox.getChildren()) {
+                if (node instanceof VBox) {
+                    VBox innerVBox = (VBox) node;
+                    for (javafx.scene.Node innerNode : innerVBox.getChildren()) {
+                        if (innerNode instanceof Label || innerNode instanceof Text) {
+                            innerNode.setStyle("-fx-text-fill: " + textHeader + ";");
+                        }
+                    }
+                }
+            }
+        }
+
+        for (javafx.scene.Node node : root.getChildren()) {
+            if (node instanceof VBox) {
+                VBox vbox = (VBox) node;
+                vbox.setStyle("-fx-background-color: " + card + "; -fx-background-radius: 20;");
+                for (javafx.scene.Node child : vbox.getChildren()) {
+                    if (child instanceof Label) {
+                        child.setStyle("-fx-text-fill: " + text + ";");
+                    }
+                    if (child instanceof TableView) {
+                        child.setStyle("-fx-background-color: " + card + ";");
+                    }
+                    if (child instanceof Button) {
+                        Button btn = (Button) child;
+                        String btnColor = btn.getText().contains("Add") ? btnSuccess :
+                                          btn.getText().contains("Update") ? btnPrimary :
+                                          btn.getText().contains("Delete") ? btnDanger :
+                                          btnPrimary;
+                        btn.setStyle("-fx-background-color: " + btnColor + "; -fx-text-fill: " + textHeader + ";");
+                    }
+                }
+            }
         }
     }
     

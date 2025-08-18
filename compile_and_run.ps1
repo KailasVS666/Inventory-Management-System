@@ -1,25 +1,26 @@
 Write-Host "Compiling JavaFX Inventory Management System..." -ForegroundColor Green
 Write-Host ""
 
-# Set JavaFX path
-$JAVAFX_PATH = "C:\Users\sharj\OneDrive\Documents\openjfx-21.0.2_windows-x64_bin-sdk\javafx-sdk-21.0.2\lib"
+# Set JavaFX SDK path
+$javafxLibPath = "C:\Users\sharj\OneDrive\Documents\openjfx-21.0.2_windows-x64_bin-sdk\javafx-sdk-21.0.2\lib"
 
 # Create sources.txt if it doesn't exist
 if (-not (Test-Path "sources.txt")) {
     Write-Host "Creating sources.txt..." -ForegroundColor Yellow
-    Get-ChildItem -Recurse -Filter "*.java" src | ForEach-Object { $_.FullName } > sources.txt
+    Get-ChildItem -Recurse -Filter "*.java" src | ForEach-Object { $_.FullName } | Set-Content sources.txt
 }
 
-# Compile with JavaFX modules
+# Compile all Java files with JavaFX modules
 Write-Host "Compiling with JavaFX modules..." -ForegroundColor Yellow
-javac --module-path $JAVAFX_PATH --add-modules javafx.controls,javafx.fxml -cp src -d out @(Get-Content sources.txt)
+$sourceFiles = Get-ChildItem -Recurse -Filter "*.java" src | ForEach-Object { $_.FullName }
+javac --module-path $javafxLibPath --add-modules javafx.controls,javafx.fxml -cp ".;src" -d out $sourceFiles
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host ""
     Write-Host "Compilation successful!" -ForegroundColor Green
     Write-Host ""
     Write-Host "Running JavaFX application..." -ForegroundColor Green
-    java --module-path $JAVAFX_PATH --add-modules javafx.controls,javafx.fxml -cp out com.inventory.gui.InventoryManagementApp
+    java --module-path $javafxLibPath --add-modules javafx.controls,javafx.fxml -cp out com.inventory.gui.InventoryManagementApp
 } else {
     Write-Host ""
     Write-Host "Compilation failed! Please check the error messages above." -ForegroundColor Red

@@ -22,6 +22,21 @@ import javafx.scene.Scene;
 import javafx.scene.paint.Color;
 import javafx.scene.effect.DropShadow;
 import java.util.Date;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Button;
+import javafx.scene.layout.VBox;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.paint.Color;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 
 public class OrdersScreen {
     
@@ -29,7 +44,8 @@ public class OrdersScreen {
     private final VBox root;
     private final TableView<Order> orderTable;
     private final ComboBox<Product> productComboBox;
-    private final TextField quantityField, customerField;
+    private final TextField quantityField, 
+    customerField;
     private final Label statusLabel;
     private final ObservableList<Order> ordersData;
     private final OrderManager orderManager;
@@ -57,7 +73,7 @@ public class OrdersScreen {
         
         // Create UI sections
         createHeader();
-        createTableSection();
+        createOrdersTable();
         createFormSection();
         createButtons();
         
@@ -91,60 +107,52 @@ public class OrdersScreen {
         root.getChildren().add(header);
     }
     
-    private void createTableSection() {
+    private void createOrdersTable() {
         VBox tableContainer = new VBox(20);
         tableContainer.setPadding(new Insets(25));
-        tableContainer.setStyle("-fx-background-color: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 15, 0, 0, 0); -fx-border-color: rgba(255,255,255,0.3); -fx-border-width: 2; -fx-border-radius: 20;");
-        
-        Label tableTitle = new Label("📊 Order List");
-        tableTitle.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 3, 0, 0, 0);");
-        
-        // Style the table
-        orderTable.setStyle("-fx-background-color: rgba(255,255,255,0.9); -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 0);");
+        tableContainer.setBackground(new Background(new BackgroundFill(Color.PALETURQUOISE, new CornerRadii(20), Insets.EMPTY)));
+        Label tableTitle = new Label("📋 Order List");
+        tableTitle.setFont(Font.font("Segoe UI", FontWeight.BOLD, 22));
+        tableTitle.setTextFill(Color.DARKSLATEGRAY);
+
+        // Use class-level orderTable and ordersData
         orderTable.setPrefHeight(350);
-        
-        // Create table columns with better styling
+        orderTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        orderTable.setPlaceholder(new Label("No orders available."));
+
         TableColumn<Order, String> idCol = new TableColumn<>("🆔 Order ID");
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
         idCol.setPrefWidth(120);
-        idCol.setStyle("-fx-background-color: linear-gradient(to bottom, #FF6B6B 0%, #4ECDC4 100%); -fx-text-fill: white;");
-        
         TableColumn<Order, String> customerCol = new TableColumn<>("👤 Customer");
-        customerCol.setCellValueFactory(new PropertyValueFactory<>("customerName"));
+        customerCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getCustomerName()));
         customerCol.setPrefWidth(150);
-        customerCol.setStyle("-fx-background-color: linear-gradient(to bottom, #FF6B6B 0%, #4ECDC4 100%); -fx-text-fill: white;");
-        
         TableColumn<Order, String> productCol = new TableColumn<>("📦 Product");
-        productCol.setCellValueFactory(new PropertyValueFactory<>("productName"));
-        productCol.setPrefWidth(200);
-        productCol.setStyle("-fx-background-color: linear-gradient(to bottom, #FF6B6B 0%, #4ECDC4 100%); -fx-text-fill: white;");
-        
+        productCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getProductName()));
+        productCol.setPrefWidth(150);
         TableColumn<Order, Integer> quantityCol = new TableColumn<>("📊 Quantity");
         quantityCol.setCellValueFactory(new PropertyValueFactory<>("quantity"));
-        quantityCol.setPrefWidth(120);
-        quantityCol.setStyle("-fx-background-color: linear-gradient(to bottom, #FF6B6B 0%, #4ECDC4 100%); -fx-text-fill: white;");
-        
+        quantityCol.setPrefWidth(100);
         TableColumn<Order, Double> totalCol = new TableColumn<>("💰 Total");
-        totalCol.setCellValueFactory(new PropertyValueFactory<>("total"));
+        totalCol.setCellValueFactory(cellData -> new javafx.beans.property.SimpleDoubleProperty(cellData.getValue().getTotal()).asObject());
         totalCol.setPrefWidth(120);
-        totalCol.setStyle("-fx-background-color: linear-gradient(to bottom, #FF6B6B 0%, #4ECDC4 100%); -fx-text-fill: white;");
-        
-        TableColumn<Order, Date> dateCol = new TableColumn<>("📅 Date");
-        dateCol.setCellValueFactory(new PropertyValueFactory<>("orderDate"));
-        dateCol.setPrefWidth(150);
-        dateCol.setStyle("-fx-background-color: linear-gradient(to bottom, #FF6B6B 0%, #4ECDC4 100%); -fx-text-fill: white;");
-        
-        orderTable.getColumns().addAll(idCol, customerCol, productCol, quantityCol, totalCol, dateCol);
-        
-        // Row selection with enhanced styling
-        orderTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-            if (newSelection != null) {
-                loadOrderToForm(newSelection);
-                // Highlight selected row
-                orderTable.setStyle("-fx-background-color: rgba(255,255,255,0.95); -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 15, 0, 0, 0);");
-            }
+        orderTable.getColumns().setAll(idCol, customerCol, productCol, quantityCol, totalCol);
+
+        // Bind class-level ordersData
+        orderTable.setItems(ordersData);
+
+        // Row highlight
+        orderTable.setRowFactory(tv -> {
+            TableRow<Order> row = new TableRow<>();
+            row.selectedProperty().addListener((obs, wasSelected, isNowSelected) -> {
+                if (isNowSelected && !row.isEmpty()) {
+                    row.setStyle("-fx-background-color: #e0f7fa;");
+                } else {
+                    row.setStyle("");
+                }
+            });
+            return row;
         });
-        
+
         tableContainer.getChildren().addAll(tableTitle, orderTable);
         root.getChildren().add(tableContainer);
     }
@@ -450,44 +458,48 @@ public class OrdersScreen {
     private void createOrder() {
         try {
             Product selectedProduct = productComboBox.getValue();
-                if (selectedProduct == null) {
-                    InventoryManagementApp.showError("Validation Error", "No product selected", "Please select a product.");
-                    return;
-                }
-                
-                String quantityText = quantityField.getText().trim();
-                if (quantityText.isEmpty()) {
-                    InventoryManagementApp.showError("Validation Error", "Quantity required", "Please enter a quantity.");
-                    return;
-                }
-                
-                int quantity = Integer.parseInt(quantityText);
-                if (quantity <= 0) {
-                    InventoryManagementApp.showError("Validation Error", "Invalid quantity", "Quantity must be greater than 0.");
-                    return;
-                }
-                
-                if (quantity > selectedProduct.getQuantity()) {
-                    InventoryManagementApp.showError("Validation Error", "Insufficient stock", 
-                        "Available stock: " + selectedProduct.getQuantity());
-                    return;
-                }
-                
-            // Create order using OrderManager - adjust based on actual Order model
-            // createOrder(selectedProduct, quantity);
-            
-            // Refresh orders and products
+            if (selectedProduct == null) {
+                InventoryManagementApp.showError("Validation Error", "No product selected", "Please select a product.");
+                return;
+            }
+            String customerName = customerField.getText().trim();
+            if (customerName.isEmpty()) {
+                InventoryManagementApp.showError("Validation Error", "Customer name required", "Please enter a customer name.");
+                return;
+            }
+            String quantityText = quantityField.getText().trim();
+            if (quantityText.isEmpty()) {
+                InventoryManagementApp.showError("Validation Error", "Quantity required", "Please enter a quantity.");
+                return;
+            }
+            int quantity = Integer.parseInt(quantityText);
+            if (quantity <= 0) {
+                InventoryManagementApp.showError("Validation Error", "Invalid quantity", "Quantity must be greater than 0.");
+                return;
+            }
+            if (quantity > selectedProduct.getQuantity()) {
+                InventoryManagementApp.showError("Validation Error", "Insufficient stock", "Available stock: " + selectedProduct.getQuantity());
+                return;
+            }
+            double totalAmount = selectedProduct.getPrice() * quantity;
+            String orderId = "O" + String.format("%03d", orderManager.getOrders().size() + 1);
+            Order order = new Order(orderId, selectedProduct.getId(), quantity, totalAmount, customerField.getText().trim());
+            orderManager.addOrder(order);
+            int newQuantity = selectedProduct.getQuantity() - quantity;
+            selectedProduct.setQuantity(newQuantity);
+            inventoryManager.updateProduct(selectedProduct);
             loadOrders();
             loadProducts();
-            
             statusLabel.setText("Order created successfully!");
             statusLabel.setStyle("-fx-text-fill: #27ae60;");
-                
-            } catch (NumberFormatException ex) {
-                InventoryManagementApp.showError("Validation Error", "Invalid quantity", "Please enter a valid number for quantity.");
-            } catch (Exception ex) {
-                InventoryManagementApp.showError("Error", "Failed to create order", ex.getMessage());
+            if (newQuantity <= selectedProduct.getReorderLevel()) {
+                InventoryManagementApp.showWarning("Low Stock Alert", "Stock is Low", String.format("Product %s is now low on stock (%d remaining). Consider reordering.", selectedProduct.getName(), newQuantity));
             }
+        } catch (NumberFormatException ex) {
+            InventoryManagementApp.showError("Validation Error", "Invalid quantity", "Please enter a valid number for quantity.");
+        } catch (Exception ex) {
+            InventoryManagementApp.showError("Error", "Failed to create order", ex.getMessage());
+        }
     }
     
     private void processSale() {
@@ -517,7 +529,9 @@ public class OrdersScreen {
                 }
                 
             // Process direct sale - adjust based on actual implementation
-            // processDirectSale(selectedProduct, quantity);
+            String orderId = "O" + String.format("%03d", orderManager.getOrders().size() + 1);
+            Order order = new Order(orderId, selectedProduct.getId(), quantity, selectedProduct.getPrice() * quantity, "Guest");
+            orderManager.addOrder(order);
             
             // Refresh orders and products
             loadOrders();
@@ -542,7 +556,7 @@ public class OrdersScreen {
             String orderId = "O" + String.format("%03d", orderManager.getOrders().size() + 1);
             
             // Create order
-            Order order = new Order(orderId, product.getId(), quantity, totalAmount);
+            Order order = new Order(orderId, product.getId(), quantity, totalAmount, customerField.getText().trim());
             
             // Add order to OrderManager
             orderManager.addOrder(order);

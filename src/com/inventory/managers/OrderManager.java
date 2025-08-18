@@ -65,7 +65,7 @@ public class OrderManager {
         String orderId = "O" + String.format("%03d", orderIdCounter++);
         
         // Create order
-        Order order = new Order(orderId, productId, quantity, totalAmount);
+        Order order = new Order(orderId, productId, quantity, totalAmount, "Guest");
         orders.add(order);
         
         // Update stock
@@ -191,7 +191,7 @@ public class OrderManager {
     
     // Getter method to access orders list for reports
     public List<Order> getOrders() {
-        return new ArrayList<>(orders);
+        return orders;
     }
     
     // GUI-friendly method to add order

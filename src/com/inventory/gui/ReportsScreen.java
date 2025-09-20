@@ -15,6 +15,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import java.io.File;
 import java.util.List;
+import javafx.scene.layout.Priority;
 
 public class ReportsScreen {
     private final InventoryManagementApp app;
@@ -357,6 +358,10 @@ public class ReportsScreen {
         
         VBox container = new VBox();
         container.getChildren().add(scrollPane);
+
+        // --- THIS IS THE NEW LINE ---
+        VBox.setVgrow(scrollPane, Priority.ALWAYS);
+        
         return container;
     }
     

@@ -34,9 +34,9 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
-import javafx.scene.paint.Color;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.scene.layout.Priority;
 
 public class OrdersScreen {
     
@@ -525,6 +525,10 @@ public class OrdersScreen {
         
         VBox container = new VBox();
         container.getChildren().add(scrollPane);
+        
+        // --- THIS IS THE NEW LINE ---
+        VBox.setVgrow(scrollPane, Priority.ALWAYS);
+        
         return container;
     }
 }

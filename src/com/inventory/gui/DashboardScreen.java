@@ -371,6 +371,9 @@ public class DashboardScreen {
         // Return a container with the scroll pane
         VBox container = new VBox();
         container.getChildren().add(scrollPane);
+        // --- THIS IS THE NEW LINE ---
+        // This makes the ScrollPane grow to fill all available vertical space
+        VBox.setVgrow(scrollPane, Priority.ALWAYS);
         return container;
     }
     

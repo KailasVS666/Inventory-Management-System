@@ -1,7 +1,6 @@
 package com.inventory.gui;
 
 import javafx.scene.layout.VBox;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -18,6 +17,7 @@ import com.inventory.managers.UserManager;
 import java.util.List;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.paint.Color;
+import javafx.scene.layout.Priority;
 
 public class SuppliersScreen {
     
@@ -63,23 +63,7 @@ public class SuppliersScreen {
         createActionButtons();
         // Create back button
         createBackButton();
-
-        // Create scrollable container
-        ScrollPane scrollPane = new ScrollPane();
-        scrollPane.setContent(root);
-        scrollPane.setFitToWidth(true);
-        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        scrollPane.setPrefViewportHeight(600);
-        scrollPane.setPrefViewportWidth(800);
-        scrollPane.setStyle("-fx-background: transparent;");
-        scrollPane.setPannable(true);
-        scrollPane.setMinViewportHeight(400);
-        scrollPane.setMinViewportWidth(600);
-        VBox scrollRoot = new VBox();
-        scrollRoot.getChildren().add(scrollPane);
-        this.root = scrollRoot;
-
+        
         applyCurrentTheme();
     }
     
@@ -240,13 +224,6 @@ public class SuppliersScreen {
         }
     }
     
-    private void populateForm(Supplier supplier) {
-        if (supplier != null) {
-            nameField.setText(supplier.getName());
-            contactInfoField.setText(supplier.getContactInfo());
-        }
-    }
-
     private void loadSupplierToForm(Supplier supplier) {
         if (supplier != null) {
             nameField.setText(supplier.getName());
@@ -402,6 +379,19 @@ public class SuppliersScreen {
     }
     
     public VBox getRoot() {
-        return root;
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setContent(root);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
+
+        VBox container = new VBox();
+        container.getChildren().add(scrollPane);
+        
+        // --- THIS IS THE NEW LINE ---
+        VBox.setVgrow(scrollPane, Priority.ALWAYS);
+
+        return container;
     }
 }

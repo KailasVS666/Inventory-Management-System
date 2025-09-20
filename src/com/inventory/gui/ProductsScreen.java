@@ -14,11 +14,13 @@ import com.inventory.models.Product;
 import com.inventory.managers.InventoryManager;
 import com.inventory.managers.UserManager;
 import java.util.List;
+import java.util.stream.Collectors;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.paint.Color;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.layout.Priority;
 
 public class ProductsScreen {
     
@@ -395,7 +397,7 @@ public class ProductsScreen {
                 .filter(product -> searchTerm.isEmpty() || product.getName().toLowerCase().contains(searchTerm.toLowerCase()))
                 .filter(product -> searchTerm.isEmpty() || String.valueOf(product.getPrice()).contains(searchTerm))
                 .filter(product -> searchTerm.isEmpty() || String.valueOf(product.getQuantity()).contains(searchTerm))
-                .toList());
+                .collect(Collectors.toList()));
             
             productTable.setItems(filteredProducts);
             
@@ -557,6 +559,11 @@ public class ProductsScreen {
         
         VBox container = new VBox();
         container.getChildren().add(scrollPane);
+
+        // --- THIS IS THE NEW LINE ---
+        // This makes the ScrollPane grow to fill all available vertical space
+        VBox.setVgrow(scrollPane, Priority.ALWAYS);
+
         return container;
     }
 }

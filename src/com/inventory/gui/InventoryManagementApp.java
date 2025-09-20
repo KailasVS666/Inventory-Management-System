@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import com.inventory.managers.InventoryManager;
 import com.inventory.managers.SupplierManager;
@@ -53,7 +54,10 @@ public class InventoryManagementApp extends Application {
             primaryStage.setTitle("Inventory Management System");
             primaryStage.setMinWidth(1200);
             primaryStage.setMinHeight(800);
-            primaryStage.setMaximized(true); // Always start maximized
+
+            // Create a single Scene that will be used for the entire application
+            Scene mainScene = new Scene(new VBox(), 1200, 800);
+            primaryStage.setScene(mainScene);
             
             // Set up window state change listener
             primaryStage.maximizedProperty().addListener((obs, wasMaximized, isMaximized) -> {
@@ -65,6 +69,8 @@ public class InventoryManagementApp extends Application {
             
             // Show login screen first
             showLoginScreen();
+            
+            primaryStage.setMaximized(true); // Always start maximized
             primaryStage.show();
         } catch (Exception e) {
             showError("Application Error", "Failed to start application", e.getMessage());
@@ -90,47 +96,27 @@ public class InventoryManagementApp extends Application {
     
     public void showLoginScreen() {
         loginScreen = new LoginScreen(this);
-        Scene scene = new Scene(loginScreen.getRoot());
-        applyTheme(scene);
-        primaryStage.setScene(scene);
-        primaryStage.centerOnScreen();
-        primaryStage.setMaximized(true);
+        primaryStage.getScene().setRoot(loginScreen.getRoot());
     }
     
     public void showDashboard() {
         dashboardScreen = new DashboardScreen(this);
-        Scene scene = new Scene(dashboardScreen.getRoot());
-        applyTheme(scene);
-        primaryStage.setScene(scene);
-        primaryStage.centerOnScreen();
-        primaryStage.setMaximized(true);
+        primaryStage.getScene().setRoot(dashboardScreen.getRoot());
     }
     
     public void showProductsScreen() {
         ProductsScreen productsScreen = new ProductsScreen(this);
-        Scene scene = new Scene(productsScreen.getRoot());
-        applyTheme(scene);
-        primaryStage.setScene(scene);
-        primaryStage.centerOnScreen();
-        primaryStage.setMaximized(true);
+        primaryStage.getScene().setRoot(productsScreen.getRoot());
     }
     
     public void showSuppliersScreen() {
         SuppliersScreen suppliersScreen = new SuppliersScreen(this);
-        Scene scene = new Scene(suppliersScreen.getRoot());
-        applyTheme(scene);
-        primaryStage.setScene(scene);
-        primaryStage.centerOnScreen();
-        primaryStage.setMaximized(true);
+        primaryStage.getScene().setRoot(suppliersScreen.getRoot());
     }
     
     public void showOrdersScreen() {
         OrdersScreen ordersScreen = new OrdersScreen(this);
-        Scene scene = new Scene(ordersScreen.getRoot());
-        applyTheme(scene);
-        primaryStage.setScene(scene);
-        primaryStage.centerOnScreen();
-        primaryStage.setMaximized(true);
+        primaryStage.getScene().setRoot(ordersScreen.getRoot());
     }
     
     public Stage getPrimaryStage() {
@@ -139,11 +125,7 @@ public class InventoryManagementApp extends Application {
     
     public void showReportsScreen() {
         ReportsScreen reportsScreen = new ReportsScreen(this);
-        Scene scene = new Scene(reportsScreen.getRoot());
-        applyTheme(scene);
-        primaryStage.setScene(scene);
-        primaryStage.centerOnScreen();
-        primaryStage.setMaximized(true);
+        primaryStage.getScene().setRoot(reportsScreen.getRoot());
     }
     
     public void logout() {

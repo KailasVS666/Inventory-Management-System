@@ -55,7 +55,7 @@ public class ProductsScreen {
         createHeader();
         createSearchSection();
         createTableSection();
-        createFormSection();
+        createFormSection(); // This method now includes validation
         createButtons();
         
         // Apply initial theme
@@ -244,6 +244,74 @@ public class ProductsScreen {
         
         formContainer.getChildren().addAll(formTitle, formGrid);
         root.getChildren().add(formContainer);
+
+        // --- NEW: REAL-TIME INPUT VALIDATION ---
+        addInputValidation();
+    }
+
+    private void addInputValidation() {
+        // Validation for Price Field (allows numbers and one decimal point)
+        priceField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue.matches("\\d*(\\.\\d*)?")) {
+                priceField.setText(oldValue);
+            }
+            // Visual feedback for validation
+            if (newValue.isEmpty() || !isValidDouble(newValue)) {
+                priceField.setStyle(getInvalidFieldStyle());
+            } else {
+                priceField.setStyle(getValidFieldStyle());
+            }
+        });
+
+        // Validation for Quantity Field (only allows whole numbers)
+        quantityField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue.matches("\\d*")) {
+                quantityField.setText(newValue.replaceAll("[^\\d]", ""));
+            }
+             if (newValue.isEmpty() || !isValidInteger(newValue)) {
+                quantityField.setStyle(getInvalidFieldStyle());
+            } else {
+                quantityField.setStyle(getValidFieldStyle());
+            }
+        });
+
+        // Validation for Reorder Level Field (only allows whole numbers)
+        reorderLevelField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue.matches("\\d*")) {
+                reorderLevelField.setText(newValue.replaceAll("[^\\d]", ""));
+            }
+             if (newValue.isEmpty() || !isValidInteger(newValue)) {
+                reorderLevelField.setStyle(getInvalidFieldStyle());
+            } else {
+                reorderLevelField.setStyle(getValidFieldStyle());
+            }
+        });
+    }
+
+    private boolean isValidDouble(String value) {
+        try {
+            Double.parseDouble(value);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+    
+    private boolean isValidInteger(String value) {
+        try {
+            Integer.parseInt(value);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private String getValidFieldStyle() {
+        return "-fx-font-size: 14; -fx-background-radius: 20; -fx-background-color: rgba(255,255,255,0.95); -fx-border-radius: 20; -fx-border-color: #4a90e2; -fx-border-width: 2; -fx-padding: 8 15; -fx-text-fill: #2c3e50;";
+    }
+
+    private String getInvalidFieldStyle() {
+        return "-fx-font-size: 14; -fx-background-radius: 20; -fx-background-color: rgba(255,255,255,0.95); -fx-border-radius: 20; -fx-border-color: red; -fx-border-width: 2; -fx-padding: 8 15; -fx-text-fill: #2c3e50;";
     }
     
     private Label createFormLabel(String text) {
@@ -256,7 +324,7 @@ public class ProductsScreen {
         field.setPromptText(prompt);
         field.setPrefHeight(40);
         field.setPrefWidth(250);
-        field.setStyle("-fx-font-size: 14; -fx-background-radius: 20; -fx-background-color: rgba(255,255,255,0.95); -fx-border-radius: 20; -fx-border-color: #4a90e2; -fx-border-width: 2; -fx-padding: 8 15; -fx-text-fill: #2c3e50;");
+        field.setStyle(getValidFieldStyle()); // Use the standard valid style
     }
     
     private void createButtons() {
@@ -560,10 +628,10 @@ public class ProductsScreen {
         VBox container = new VBox();
         container.getChildren().add(scrollPane);
 
-        // --- THIS IS THE NEW LINE ---
         // This makes the ScrollPane grow to fill all available vertical space
         VBox.setVgrow(scrollPane, Priority.ALWAYS);
 
         return container;
     }
 }
+

@@ -515,8 +515,9 @@ public class ProductsScreen {
                 return;
             }
             
-            // Generate a simple ID for new products
-            String id = "P" + System.currentTimeMillis();
+            // --- THIS IS THE FIX ---
+            // Replace the old timestamp-based ID with a call to the manager
+            String id = inventoryManager.generateProductId();
             
             Product newProduct = new Product(
                 id,
@@ -634,4 +635,3 @@ public class ProductsScreen {
         return container;
     }
 }
-
